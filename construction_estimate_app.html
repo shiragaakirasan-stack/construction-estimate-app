@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>工事見積書作成アプリ</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --ink: #17202a;
+      --muted: #64748b;
+      --line: #d9e2ec;
+      --main: #2563eb;
+      --main-dark: #1d4ed8;
+      --danger: #dc2626;
+      --soft: #eef4ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    header {
+      padding: 22px 28px;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      letter-spacing: .04em;
+    }
+
+    header p {
+      margin: 0;
+      opacity: .9;
+      font-size: 14px;
+    }
+
+    main {
+      width: min(1480px, 96vw);
+      margin: 24px auto 48px;
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, .07);
+      padding: 18px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+      border-left: 5px solid var(--main);
+      padding-left: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 11px;
+      font-size: 14px;
+      background: white;
+      color: var(--ink);
+    }
+
+    input[type="file"] {
+      padding: 8px;
+      background: #f8fafc;
+    }
+
+    textarea { min-height: 78px; resize: vertical; }
+
+    input:focus, textarea:focus, select:focus {
+      outline: 3px solid rgba(37, 99, 235, .16);
+      border-color: var(--main);
+    }
+
+    .section { margin-bottom: 18px; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 15px;
+      font-weight: 800;
+      cursor: pointer;
+      background: var(--main);
+      color: white;
+      transition: .16s ease;
+      white-space: nowrap;
+    }
+
+    button:hover { background: var(--main-dark); transform: translateY(-1px); }
+    button.secondary { background: #334155; }
+    button.light { background: var(--soft); color: #1e3a8a; }
+    button.danger { background: var(--danger); padding: 8px 10px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 6px;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: left;
+      background: #f8fafc;
+    }
+
+    td input { padding: 8px; border-radius: 8px; }
+    td textarea { min-height: 42px; padding: 8px; border-radius: 8px; font-size: 13px; }
+    .editor-table td:nth-child(1) { min-width: 190px; }
+    .editor-table td:nth-child(2) { min-width: 240px; }
+    .editor-table td:nth-child(3) { width: 78px; }
+    .editor-table td:nth-child(4) { width: 76px; }
+    .editor-table td:nth-child(5) { width: 118px; }
+    .editor-table td:nth-child(6) { width: 124px; text-align: right; font-weight: 800; white-space: nowrap; }
+    .editor-table td:nth-child(7) { width: 54px; text-align: center; }
+
+    .summary {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .sum-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      font-size: 15px;
+    }
+
+    .sum-row.total {
+      border-top: 2px solid var(--line);
+      padding-top: 10px;
+      font-size: 22px;
+      font-weight: 900;
+      color: #1e3a8a;
+    }
+
+    .seal-editor-box {
+      display: grid;
+      grid-template-columns: 1fr 130px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .seal-sample {
+      width: 92px;
+      height: 92px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: #f8fafc;
+      overflow: hidden;
+      margin-left: auto;
+    }
+
+    .seal-sample img {
+      max-width: 86px;
+      max-height: 86px;
+      object-fit: contain;
+    }
+
+    .preview {
+      background: white;
+      padding: 24px;
+      border: 1px solid var(--line);
+      min-height: 800px;
+      position: relative;
+    }
+
+    .estimate-title {
+      text-align: center;
+      font-size: 30px;
+      letter-spacing: .25em;
+      font-weight: 900;
+      margin-bottom: 22px;
+    }
+
+    .preview-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .client-name {
+      font-size: 20px;
+      font-weight: 900;
+      border-bottom: 2px solid #111827;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+
+    .company-box {
+      text-align: right;
+      line-height: 1.7;
+      font-size: 13px;
+      position: relative;
+      min-height: 154px;
+      padding-right: 6px;
+    }
+
+    .seal-on-preview {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 82px;
+      height: 82px;
+      object-fit: contain;
+      opacity: .88;
+      pointer-events: none;
+    }
+
+    .seal-hidden { display: none; }
+
+    .price-box {
+      border: 3px solid #111827;
+      padding: 12px 14px;
+      margin: 16px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 900;
+      font-size: 22px;
+    }
+
+    .preview-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px 18px;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .preview table th, .preview table td {
+      border: 1px solid #cbd5e1;
+      padding: 7px;
+    }
+
+    .preview table th { background: #e2e8f0; color: #0f172a; }
+    .preview-detail { white-space: pre-wrap; font-size: 12px; line-height: 1.55; }
+    .right { text-align: right; }
+    .center { text-align: center; }
+    .note-box {
+      margin-top: 16px;
+      border: 1px solid #cbd5e1;
+      padding: 12px;
+      min-height: 64px;
+      white-space: pre-wrap;
+      font-size: 13px;
+    }
+
+    .small-muted { color: var(--muted); font-size: 12px; }
+
+    @media (max-width: 980px) {
+      main { grid-template-columns: 1fr; }
+      .grid, .grid.three, .preview-top, .preview-meta, .seal-editor-box { grid-template-columns: 1fr; }
+      .seal-sample { margin-left: 0; }
+    }
+
+    @page {
+      size: A4 landscape;
+      margin: 10mm;
+    }
+
+    @media print {
+      body { background: white; }
+      header, .editor, .print-hide { display: none !important; }
+      main { display: block; width: 100%; margin: 0; }
+      .card { border: 0; box-shadow: none; padding: 0; }
+      .preview {
+        border: 0;
+        padding: 0;
+        min-height: auto;
+        width: 100%;
+      }
+      .estimate-title { font-size: 26px; margin-bottom: 14px; }
+      .preview-top { grid-template-columns: 1fr 1fr; margin-bottom: 10px; }
+      .price-box { font-size: 20px; margin: 10px 0; padding: 9px 12px; }
+      .preview-meta { grid-template-columns: repeat(4, 1fr); gap: 6px 12px; margin-bottom: 12px; }
+      .preview table { font-size: 11px; page-break-inside: auto; }
+      .preview table th, .preview table td { padding: 5px; }
+      .preview tr { page-break-inside: avoid; page-break-after: auto; }
+      .note-box { font-size: 11px; min-height: 48px; margin-top: 10px; }
+      .company-box { font-size: 11px; min-height: 118px; }
+      .client-name { font-size: 18px; }
+      .seal-on-preview { width: 68px; height: 68px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>工事見積書作成アプリ</h1>
+    <p>入力した内容が右側の見積書に即反映。印刷・PDF保存・データ保存まで対応。</p>
+  </header>
+
+  <main>
+    <section class="card editor">
+      <div class="section">
+        <h2>基本情報</h2>
+        <div class="grid">
+          <div>
+            <label>見積番号</label>
+            <input id="estimateNo" value="EST-2026-001" />
+          </div>
+          <div>
+            <label>作成日</label>
+            <input id="issueDate" type="date" />
+          </div>
+          <div>
+            <label>お客様名</label>
+            <input id="clientName" value="〇〇 様" />
+          </div>
+          <div>
+            <label>件名</label>
+            <input id="projectName" value="内装改修工事" />
+          </div>
+          <div>
+            <label>工事場所</label>
+            <input id="siteAddress" value="大阪府大阪市〇〇区〇〇" />
+          </div>
+          <div>
+            <label>有効期限</label>
+            <input id="validUntil" value="発行日より30日間" />
+          </div>
+          <div>
+            <label>工期</label>
+            <input id="workPeriod" value="ご契約後、別途ご相談" />
+          </div>
+          <div>
+            <label>支払条件</label>
+            <input id="paymentTerms" value="着手金50％・完了後50％" />
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>自社情報</h2>
+        <div class="grid">
+          <div>
+            <label>会社名・屋号</label>
+            <input id="companyName" value="株式会社サンプル工務店" />
+          </div>
+          <div>
+            <label>担当者</label>
+            <input id="staffName" value="山田 太郎" />
+          </div>
+          <div>
+            <label>電話番号</label>
+            <input id="tel" value="06-0000-0000" />
+          </div>
+          <div>
+            <label>メール</label>
+            <input id="email" value="info@example.com" />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label>住所</label>
+            <input id="companyAddress" value="大阪府大阪市中央区〇〇 1-2-3" />
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>電子印鑑</h2>
+        <div class="seal-editor-box">
+          <div>
+            <label>印鑑画像を登録</label>
+            <input id="sealInput" type="file" accept="image/*" />
+            <div class="toolbar">
+              <button class="light" onclick="toggleSeal()" type="button" id="sealToggleBtn">押印する</button>
+              <button class="secondary" onclick="saveSeal()" type="button">印鑑を保存</button>
+              <button class="danger" onclick="clearSeal()" type="button">印鑑削除</button>
+            </div>
+            <p class="small-muted">透過PNGの印鑑画像がおすすめです。登録した画像はこのブラウザ内に保存されます。</p>
+          </div>
+          <div>
+            <label>登録印鑑</label>
+            <div class="seal-sample" id="sealSample">未登録</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>明細</h2>
+        <div style="overflow-x:auto;">
+          <table id="itemTable" class="editor-table">
+            <thead>
+              <tr>
+                <th>工事項目</th>
+                <th>工事詳細</th>
+                <th>数量</th>
+                <th>単位</th>
+                <th>単価</th>
+                <th>金額</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+        </div>
+        <div class="toolbar">
+          <button onclick="addItem()">＋ 項目追加</button>
+          <button class="light" onclick="addPreset('解体撤去工事','既存内装材・不要部材の撤去、搬出、処分を含む',1,'式',50000)">解体</button>
+          <button class="light" onclick="addPreset('電気配線工事','照明・コンセントまわりの配線調整、器具取付を含む',1,'式',80000)">電気</button>
+          <button class="light" onclick="addPreset('クロス貼替工事','既存クロス撤去、下地調整、量産クロス貼り',50,'㎡',1800)">クロス</button>
+          <button class="light" onclick="addPreset('床仕上げ工事','下地調整、フロア材施工、端部処理を含む',30,'㎡',4500)">床</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>税・値引き</h2>
+        <div class="grid three">
+          <div>
+            <label>消費税率</label>
+            <select id="taxRate">
+              <option value="0.10">10%</option>
+              <option value="0.08">8%</option>
+              <option value="0">非課税</option>
+            </select>
+          </div>
+          <div>
+            <label>値引き額</label>
+            <input id="discount" type="number" value="0" min="0" />
+          </div>
+          <div>
+            <label>端数処理</label>
+            <select id="roundMode">
+              <option value="round">四捨五入</option>
+              <option value="floor">切り捨て</option>
+              <option value="ceil">切り上げ</option>
+            </select>
+          </div>
+        </div>
+        <div class="summary">
+          <div class="sum-row"><span>小計</span><strong id="sumSubtotal">¥0</strong></div>
+          <div class="sum-row"><span>値引き</span><strong id="sumDiscount">¥0</strong></div>
+          <div class="sum-row"><span>消費税</span><strong id="sumTax">¥0</strong></div>
+          <div class="sum-row total"><span>合計</span><strong id="sumTotal">¥0</strong></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>備考</h2>
+        <textarea id="notes">・上記金額には材料費・施工費を含みます。
+・現地状況により内容が変更となる場合がございます。
+・追加工事が発生する場合は、事前にご相談いたします。</textarea>
+      </div>
+
+      <div class="toolbar print-hide">
+        <button onclick="window.print()">印刷 / PDF保存</button>
+        <button class="secondary" onclick="saveData()">データ保存</button>
+        <button class="secondary" onclick="loadData()">保存データ読込</button>
+        <button class="danger" onclick="resetData()">初期化</button>
+      </div>
+      <p class="small-muted print-hide">PDF保存は「印刷」から送信先を「PDFに保存」にすると作成できます。用紙設定はA4横向きになります。</p>
+    </section>
+
+    <section class="card">
+      <div class="preview" id="preview">
+        <div class="estimate-title">御見積書</div>
+        <div class="preview-top">
+          <div>
+            <div class="client-name" id="pClientName"></div>
+            <p>下記の通り御見積申し上げます。</p>
+          </div>
+          <div class="company-box">
+            <div>見積番号：<span id="pEstimateNo"></span></div>
+            <div>作成日：<span id="pIssueDate"></span></div>
+            <br />
+            <strong id="pCompanyName"></strong><br />
+            <span id="pCompanyAddress"></span><br />
+            TEL：<span id="pTel"></span><br />
+            Mail：<span id="pEmail"></span><br />
+            担当：<span id="pStaffName"></span>
+            <img id="pSeal" class="seal-on-preview seal-hidden" alt="電子印鑑" />
+          </div>
+        </div>
+
+        <div class="price-box">
+          <span>御見積金額</span>
+          <span id="pGrandTotal">¥0</span>
+        </div>
+
+        <div class="preview-meta">
+          <div>件名：<strong id="pProjectName"></strong></div>
+          <div>工事場所：<strong id="pSiteAddress"></strong></div>
+          <div>有効期限：<strong id="pValidUntil"></strong></div>
+          <div>工期：<strong id="pWorkPeriod"></strong></div>
+          <div>支払条件：<strong id="pPaymentTerms"></strong></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:22%;">工事項目</th>
+              <th style="width:34%;">工事詳細</th>
+              <th class="center" style="width:8%;">数量</th>
+              <th class="center" style="width:8%;">単位</th>
+              <th class="right" style="width:14%;">単価</th>
+              <th class="right" style="width:14%;">金額</th>
+            </tr>
+          </thead>
+          <tbody id="pItemsBody"></tbody>
+        </table>
+
+        <table style="width: 42%; margin-left: auto; margin-top: 14px;">
+          <tbody>
+            <tr><th>小計</th><td class="right" id="pSubtotal">¥0</td></tr>
+            <tr><th>値引き</th><td class="right" id="pDiscount">¥0</td></tr>
+            <tr><th>消費税</th><td class="right" id="pTax">¥0</td></tr>
+            <tr><th>合計</th><td class="right" id="pTotal" style="font-weight:900;">¥0</td></tr>
+          </tbody>
+        </table>
+
+        <div class="note-box" id="pNotes"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const fields = [
+      'estimateNo','issueDate','clientName','projectName','siteAddress','validUntil','workPeriod','paymentTerms',
+      'companyName','staffName','tel','email','companyAddress','taxRate','discount','roundMode','notes'
+    ];
+
+    let items = [
+      { name: '仮設・養生工事', detail: '共用部・施工箇所の養生、搬入経路保護、簡易清掃を含む', qty: 1, unit: '式', price: 30000 },
+      { name: '内装下地工事', detail: '壁・床まわりの下地補修、軽微な不陸調整を含む', qty: 1, unit: '式', price: 120000 },
+      { name: '仕上げ工事', detail: '指定仕上げ材の施工、端部処理、施工後確認を含む', qty: 1, unit: '式', price: 180000 },
+      { name: '諸経費', detail: '現場管理費、交通費、軽微な消耗品費を含む', qty: 1, unit: '式', price: 40000 }
+    ];
+
+    let sealImage = localStorage.getItem('constructionEstimateSeal') || '';
+    let sealEnabled = localStorage.getItem('constructionEstimateSealEnabled') === 'true';
+
+    function yen(num) {
+      return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(Number(num || 0));
+    }
+
+    function today() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function formatDate(value) {
+      if (!value) return '';
+      const [y,m,d] = value.split('-');
+      return `${y}年${Number(m)}月${Number(d)}日`;
+    }
+
+    function roundByMode(value) {
+      const mode = document.getElementById('roundMode').value;
+      if (mode === 'floor') return Math.floor(value);
+      if (mode === 'ceil') return Math.ceil(value);
+      return Math.round(value);
+    }
+
+    function calc() {
+      const subtotal = items.reduce((sum, item) => sum + Number(item.qty || 0) * Number(item.price || 0), 0);
+      const discount = Math.min(Number(document.getElementById('discount').value || 0), subtotal);
+      const taxRate = Number(document.getElementById('taxRate').value || 0);
+      const tax = roundByMode((subtotal - discount) * taxRate);
+      const total = subtotal - discount + tax;
+      return { subtotal, discount, tax, total };
+    }
+
+    function renderItems() {
+      const body = document.getElementById('itemsBody');
+      body.innerHTML = '';
+      items.forEach((item, index) => {
+        const amount = Number(item.qty || 0) * Number(item.price || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input value="${escapeHtml(item.name)}" oninput="updateItem(${index}, 'name', this.value)" /></td>
+          <td><textarea oninput="updateItem(${index}, 'detail', this.value)">${escapeHtml(item.detail || '')}</textarea></td>
+          <td><input type="number" value="${item.qty}" min="0" step="0.1" oninput="updateItem(${index}, 'qty', this.value)" /></td>
+          <td><input value="${escapeHtml(item.unit)}" oninput="updateItem(${index}, 'unit', this.value)" /></td>
+          <td><input type="number" value="${item.price}" min="0" oninput="updateItem(${index}, 'price', this.value)" /></td>
+          <td>${yen(amount)}</td>
+          <td><button class="danger" onclick="removeItem(${index})">削除</button></td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderSeal() {
+      const sample = document.getElementById('sealSample');
+      const pSeal = document.getElementById('pSeal');
+      const toggleBtn = document.getElementById('sealToggleBtn');
+
+      if (sealImage) {
+        sample.innerHTML = `<img src="${sealImage}" alt="登録印鑑" />`;
+        pSeal.src = sealImage;
+      } else {
+        sample.textContent = '未登録';
+        pSeal.removeAttribute('src');
+      }
+
+      if (sealImage && sealEnabled) {
+        pSeal.classList.remove('seal-hidden');
+        toggleBtn.textContent = '押印を外す';
+      } else {
+        pSeal.classList.add('seal-hidden');
+        toggleBtn.textContent = '押印する';
+      }
+    }
+
+    function renderPreview() {
+      const ids = {
+        pEstimateNo: 'estimateNo', pClientName: 'clientName', pProjectName: 'projectName', pSiteAddress: 'siteAddress',
+        pValidUntil: 'validUntil', pWorkPeriod: 'workPeriod', pPaymentTerms: 'paymentTerms', pCompanyName: 'companyName',
+        pCompanyAddress: 'companyAddress', pTel: 'tel', pEmail: 'email', pStaffName: 'staffName'
+      };
+      Object.entries(ids).forEach(([previewId, inputId]) => {
+        document.getElementById(previewId).textContent = document.getElementById(inputId).value;
+      });
+      document.getElementById('pIssueDate').textContent = formatDate(document.getElementById('issueDate').value);
+      document.getElementById('pNotes').textContent = document.getElementById('notes').value;
+
+      const pBody = document.getElementById('pItemsBody');
+      pBody.innerHTML = '';
+      items.forEach(item => {
+        const amount = Number(item.qty || 0) * Number(item.price || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(item.name)}</td>
+          <td class="preview-detail">${escapeHtml(item.detail || '')}</td>
+          <td class="center">${item.qty}</td>
+          <td class="center">${escapeHtml(item.unit)}</td>
+          <td class="right">${yen(item.price)}</td>
+          <td class="right">${yen(amount)}</td>
+        `;
+        pBody.appendChild(tr);
+      });
+
+      const { subtotal, discount, tax, total } = calc();
+      document.getElementById('sumSubtotal').textContent = yen(subtotal);
+      document.getElementById('sumDiscount').textContent = '-' + yen(discount);
+      document.getElementById('sumTax').textContent = yen(tax);
+      document.getElementById('sumTotal').textContent = yen(total);
+
+      document.getElementById('pSubtotal').textContent = yen(subtotal);
+      document.getElementById('pDiscount').textContent = '-' + yen(discount);
+      document.getElementById('pTax').textContent = yen(tax);
+      document.getElementById('pTotal').textContent = yen(total);
+      document.getElementById('pGrandTotal').textContent = yen(total);
+      renderSeal();
+    }
+
+    function update() {
+      renderItems();
+      renderPreview();
+    }
+
+    function updateItem(index, key, value) {
+      items[index][key] = value;
+      renderPreview();
+      renderItems();
+    }
+
+    function addItem() {
+      items.push({ name: '', detail: '', qty: 1, unit: '式', price: 0 });
+      update();
+    }
+
+    function addPreset(name, detail, qty, unit, price) {
+      items.push({ name, detail, qty, unit, price });
+      update();
+    }
+
+    function removeItem(index) {
+      items.splice(index, 1);
+      update();
+    }
+
+    function toggleSeal() {
+      if (!sealImage) {
+        alert('先に印鑑画像を登録してください');
+        return;
+      }
+      sealEnabled = !sealEnabled;
+      localStorage.setItem('constructionEstimateSealEnabled', String(sealEnabled));
+      renderSeal();
+    }
+
+    function saveSeal() {
+      if (!sealImage) {
+        alert('保存する印鑑画像がありません');
+        return;
+      }
+      localStorage.setItem('constructionEstimateSeal', sealImage);
+      localStorage.setItem('constructionEstimateSealEnabled', String(sealEnabled));
+      alert('印鑑を保存しました');
+    }
+
+    function clearSeal() {
+      if (!confirm('登録した印鑑を削除しますか？')) return;
+      sealImage = '';
+      sealEnabled = false;
+      localStorage.removeItem('constructionEstimateSeal');
+      localStorage.removeItem('constructionEstimateSealEnabled');
+      document.getElementById('sealInput').value = '';
+      renderSeal();
+    }
+
+    function saveData() {
+      const data = { fields: {}, items, sealEnabled };
+      fields.forEach(id => data.fields[id] = document.getElementById(id).value);
+      localStorage.setItem('constructionEstimateData', JSON.stringify(data));
+      localStorage.setItem('constructionEstimateSealEnabled', String(sealEnabled));
+      alert('保存しました');
+    }
+
+    function loadData() {
+      const raw = localStorage.getItem('constructionEstimateData');
+      if (!raw) return alert('保存データがありません');
+      const data = JSON.parse(raw);
+      Object.entries(data.fields || {}).forEach(([id, value]) => {
+        if (document.getElementById(id)) document.getElementById(id).value = value;
+      });
+      items = (data.items || items).map(item => ({ detail: '', ...item }));
+      if (typeof data.sealEnabled === 'boolean') sealEnabled = data.sealEnabled;
+      update();
+    }
+
+    function resetData() {
+      if (!confirm('入力内容を初期化しますか？ 印鑑登録は残ります。')) return;
+      localStorage.removeItem('constructionEstimateData');
+      location.reload();
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    document.getElementById('issueDate').value = today();
+    fields.forEach(id => document.getElementById(id).addEventListener('input', renderPreview));
+    fields.forEach(id => document.getElementById(id).addEventListener('change', renderPreview));
+
+    document.getElementById('sealInput').addEventListener('change', (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        sealImage = reader.result;
+        sealEnabled = true;
+        localStorage.setItem('constructionEstimateSeal', sealImage);
+        localStorage.setItem('constructionEstimateSealEnabled', 'true');
+        renderSeal();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    update();
+  </script>
+</body>
+</html>
