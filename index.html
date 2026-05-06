@@ -604,7 +604,7 @@
       return { category: '', name: '', detail: '', remark: '', qty: '', unit: '', price: '' };
     }
 
-    let items = [blankItem()];
+    let items = [];
 
     let sealImage = localStorage.getItem('constructionEstimateSeal') || '';
     let sealEnabled = localStorage.getItem('constructionEstimateSealEnabled') === 'true';
@@ -821,10 +821,11 @@
     }
 
     function updateItem(index, key, value) {
+      if (!items[index]) return;
       items[index][key] = value;
 
-      // 入力中に表全体を再描画すると、1文字ごとにカーソルが飛ぶため禁止。
-      // 数量・単価の変更時だけ、その行の金額表示と合計欄を更新する。
+      // 入力中に表全体を再描画しない。
+      // これで工種・項目・詳細・備考・数量・単位・単価を連続入力できる。
       if (key === 'qty' || key === 'price') {
         const amountCell = document.querySelector(`[data-amount-index="${index}"]`);
         if (amountCell) {
@@ -841,7 +842,7 @@
     }
 
     function addItem() {
-      items.push({ category: 'その他工事', name: '', detail: '', remark: '', qty: 1, unit: '式', price: '' });
+      items.push({ category: '', name: '', detail: '', remark: '', qty: '', unit: '', price: '' });
       renderItems();
     }
 
