@@ -682,7 +682,7 @@
           <td><input type="number" value="${item.qty}" min="0" step="0.1" oninput="updateItem(${index}, 'qty', this.value)" /></td>
           <td><input value="${escapeHtml(item.unit)}" oninput="updateItem(${index}, 'unit', this.value)" /></td>
           <td><input type="number" value="${item.price}" min="0" oninput="updateItem(${index}, 'price', this.value)" placeholder="0" /></td>
-          <td>${yen(amount)}</td>
+          <td data-amount-index="${index}">${yen(amount)}</td>
           <td><button class="danger" onclick="removeItem(${index})">削除</button></td>
         `;
         body.appendChild(tr);
@@ -822,6 +822,21 @@
 
     function updateItem(index, key, value) {
       items[index][key] = value;
+
+      // 入力中に表全体を再描画すると、1文字ごとにカーソルが飛ぶため禁止。
+      // 数量・単価の変更時だけ、その行の金額表示と合計欄を更新する。
+      if (key === 'qty' || key === 'price') {
+        const amountCell = document.querySelector(`[data-amount-index="${index}"]`);
+        if (amountCell) {
+          const item = items[index];
+          const amount = Number(item.qty || 0) * Number(item.price || 0);
+          amountCell.textContent = yen(amount);
+        }
+      }
+
+      renderSummary();
+    }
+
       renderItems();
     }
 
