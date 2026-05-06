@@ -165,6 +165,29 @@
 
     .table-wrap { overflow-x: auto; }
 
+    .category-tools {
+      display: grid;
+      grid-template-columns: minmax(220px, 320px) 1fr;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 14px;
+      padding: 14px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .work-preset-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    @media (max-width: 980px) {
+      .category-tools { grid-template-columns: 1fr; }
+    }
+
+
     .editor-table {
       min-width: 1320px;
     }
@@ -527,6 +550,41 @@
 
       <div class="card">
         <h2>明細</h2>
+
+        <div class="category-tools">
+          <div>
+            <label>現在の工種（大枠）</label>
+            <select id="activeCategory">
+              <option value="塗装工事">塗装工事</option>
+              <option value="シーリング工事">シーリング工事</option>
+              <option value="足場工事">足場工事</option>
+              <option value="防水工事">防水工事</option>
+              <option value="屋根工事">屋根工事</option>
+              <option value="内装工事">内装工事</option>
+              <option value="床工事">床工事</option>
+              <option value="解体工事">解体工事</option>
+              <option value="電気工事">電気工事</option>
+              <option value="設備工事">設備工事</option>
+              <option value="空調工事">空調工事</option>
+              <option value="外構工事">外構工事</option>
+              <option value="左官工事">左官工事</option>
+              <option value="大工工事">大工工事</option>
+              <option value="清掃工事">清掃工事</option>
+              <option value="付帯工事">付帯工事</option>
+              <option value="その他工事">その他工事</option>
+            </select>
+          </div>
+          <div>
+            <label>この工種に作業内容を追加</label>
+            <div class="work-preset-panel" id="workPresetPanel"></div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <button onclick="addItem()">＋ 空行追加</button>
+          <button class="light" onclick="addCategoryHeader()">＋ 工種だけの空行追加</button>
+        </div>
+
         <div class="table-wrap">
           <table class="editor-table">
             <thead>
@@ -544,25 +602,6 @@
             </thead>
             <tbody id="itemsBody"></tbody>
           </table>
-        </div>
-        <div class="toolbar">
-          <button onclick="addItem()">＋ 空行追加</button>
-          <button class="light" onclick="addPreset('塗装工事','外壁塗装',1,'式')">塗装</button>
-          <button class="light" onclick="addPreset('シーリング工事','シーリング打替',1,'式')">シーリング</button>
-          <button class="light" onclick="addPreset('足場工事','仮設足場',1,'式')">足場</button>
-          <button class="light" onclick="addPreset('防水工事','屋上防水',1,'式')">防水</button>
-          <button class="light" onclick="addPreset('屋根工事','屋根補修',1,'式')">屋根</button>
-          <button class="light" onclick="addPreset('内装工事','クロス貼替',1,'式')">内装</button>
-          <button class="light" onclick="addPreset('床工事','フロア施工',1,'式')">床</button>
-          <button class="light" onclick="addPreset('解体工事','内装解体',1,'式')">解体</button>
-          <button class="light" onclick="addPreset('電気工事','照明交換',1,'式')">電気</button>
-          <button class="light" onclick="addPreset('設備工事','給排水設備',1,'式')">設備</button>
-          <button class="light" onclick="addPreset('空調工事','エアコン設置',1,'式')">空調</button>
-          <button class="light" onclick="addPreset('外構工事','外構工事',1,'式')">外構</button>
-          <button class="light" onclick="addPreset('左官工事','モルタル補修',1,'式')">左官</button>
-          <button class="light" onclick="addPreset('大工工事','木下地工事',1,'式')">大工</button>
-          <button class="light" onclick="addPreset('清掃工事','竣工清掃',1,'式')">清掃</button>
-          <button class="light" onclick="addPreset('付帯工事','諸経費',1,'式')">諸経費</button>
         </div>
       </div>
 
@@ -693,31 +732,119 @@
       return groups;
     }
 
+
+    const workPresets = {
+      '塗装工事': ['下地補修', '高圧洗浄', '養生', 'ケレン清掃', '錆止め塗装', '下塗り', '中塗り', '上塗り', '付帯部塗装', '軒天塗装', '破風板塗装', '雨樋塗装'],
+      'シーリング工事': ['既存シーリング撤去', 'プライマー塗布', 'シーリング打替', 'シーリング増し打ち', '端部処理'],
+      '足場工事': ['仮設足場', 'メッシュシート', '昇降階段', '足場解体'],
+      '防水工事': ['下地処理', 'プライマー塗布', 'ウレタン防水', 'トップコート', 'ドレン改修'],
+      '屋根工事': ['屋根高圧洗浄', '屋根下塗り', '屋根中塗り', '屋根上塗り', '棟板金補修', '屋根補修'],
+      '内装工事': ['クロス撤去', '下地補修', 'クロス貼替', 'ボード補修', '建具調整'],
+      '床工事': ['既存床撤去', '下地調整', 'フロア施工', 'クッションフロア施工', '巾木取付'],
+      '解体工事': ['養生', '内装解体', '廃材搬出', '産廃処分'],
+      '電気工事': ['配線工事', '照明交換', 'スイッチ交換', 'コンセント増設'],
+      '設備工事': ['給排水配管', '水栓交換', '水回り設備交換', 'トイレ交換', '洗面台交換'],
+      '空調工事': ['既存撤去', 'エアコン設置', '配管接続', '試運転'],
+      '外構工事': ['土間打設', 'ブロック積み', 'フェンス設置', '門扉設置'],
+      '左官工事': ['下地処理', 'モルタル補修', '仕上げ塗り'],
+      '大工工事': ['木下地工事', '造作工事', '建具枠取付'],
+      '清掃工事': ['美装清掃', '竣工清掃', '残材処分'],
+      '付帯工事': ['諸経費', '現場管理費', '運搬費'],
+      'その他工事': ['作業一式']
+    };
+
+    function getActiveCategory() {
+      return document.getElementById('activeCategory')?.value || 'その他工事';
+    }
+
+    function escapeJs(str) {
+      return String(str ?? '').replaceAll('\\', '\\\\').replaceAll("'", "\\'").replaceAll('\n', '\\n').replaceAll('\r', '');
+    }
+
+    function renderWorkPresets() {
+      const panel = document.getElementById('workPresetPanel');
+      if (!panel) return;
+      const category = getActiveCategory();
+      const presets = workPresets[category] || [];
+      panel.innerHTML = presets.map(name =>
+        `<button class="light" type="button" onclick="addWorkItem('${escapeJs(category)}','${escapeJs(name)}')">${escapeHtml(name)}</button>`
+      ).join('');
+    }
+
+    function addWorkItem(category, name) {
+      items.push({ category, name, detail: '', remark: '', qty: '', unit: '', price: '' });
+      renderItems();
+    }
+
+    function addCategoryHeader() {
+      const category = getActiveCategory();
+      items.push({ category, name: '', detail: '', remark: '', qty: '', unit: '', price: '' });
+      renderItems();
+    }
+
     function renderItems() {
       const body = document.getElementById('itemsBody');
       body.innerHTML = '';
 
+      let previousCategory = '';
+
       items.forEach((item, index) => {
         const amount = Number(item.qty || 0) * Number(item.price || 0);
+
+        // 同じ工種が続く場合は、2行目以降は空欄表示
+        const showCategory = item.category !== previousCategory;
+        previousCategory = item.category;
+
         const tr = document.createElement('tr');
         tr.dataset.index = index;
 
         tr.innerHTML = `
-          <td><input data-key="category" value="${escapeHtml(item.category || '')}" placeholder="例：塗装工事" /></td>
-          <td><input data-key="name" value="${escapeHtml(item.name || '')}" placeholder="例：外壁塗装" /></td>
-          <td><textarea data-key="detail" placeholder="工事内容を入力">${escapeHtml(item.detail || '')}</textarea></td>
-          <td><textarea data-key="remark" placeholder="備考・注意事項など">${escapeHtml(item.remark || '')}</textarea></td>
-          <td><input data-key="qty" type="number" value="${escapeHtml(item.qty || '')}" min="0" step="0.1" /></td>
-          <td><input data-key="unit" value="${escapeHtml(item.unit || '')}" /></td>
-          <td><input data-key="price" type="number" value="${escapeHtml(item.price || '')}" min="0" placeholder="0" /></td>
+          <td>
+            ${showCategory
+              ? `<input data-key="category" value="${escapeHtml(item.category || '')}" placeholder="例：塗装工事" style="font-weight:800;background:#f8fafc;" />`
+              : `<div style="height:42px;"></div>`
+            }
+          </td>
+
+          <td><input data-key="name" value="${escapeHtml(item.name || '')}" placeholder="例：下地補修" /></td>
+
+          <td>
+            <textarea data-key="detail" placeholder="工事内容を入力">${escapeHtml(item.detail || '')}</textarea>
+          </td>
+
+          <td>
+            <textarea data-key="remark" placeholder="備考・注意事項など">${escapeHtml(item.remark || '')}</textarea>
+          </td>
+
+          <td>
+            <input data-key="qty" type="number" value="${escapeHtml(item.qty || '')}" min="0" step="0.1" />
+          </td>
+
+          <td>
+            <input data-key="unit" value="${escapeHtml(item.unit || '')}" />
+          </td>
+
+          <td>
+            <input data-key="price" type="number" value="${escapeHtml(item.price || '')}" min="0" placeholder="0" />
+          </td>
+
           <td data-amount>${yen(amount)}</td>
-          <td><button class="danger" type="button" onclick="removeItem(${index})">削除</button></td>
+
+          <td>
+            <button class="danger" type="button" onclick="removeItem(${index})">削除</button>
+          </td>
         `;
 
         tr.querySelectorAll('input, textarea').forEach(el => {
           el.addEventListener('input', () => {
             const key = el.dataset.key;
             items[index][key] = el.value;
+
+            // 工種変更時は再描画
+            if (key === 'category') {
+              renderItems();
+              return;
+            }
 
             if (key === 'qty' || key === 'price') {
               const amountCell = tr.querySelector('[data-amount]');
@@ -873,12 +1000,12 @@
     }
 
     function addItem() {
-      items.push({ category: '', name: '', detail: '', remark: '', qty: '', unit: '', price: '' });
+      items.push({ category: getActiveCategory(), name: '', detail: '', remark: '', qty: '', unit: '', price: '' });
       renderItems();
     }
 
     function addPreset(category, name, qty, unit) {
-      items.push({ category, name, detail: '', remark: '', qty, unit, price: '' });
+      items.push({ category, name, detail: '', remark: '', qty: qty ?? '', unit: unit ?? '', price: '' });
       renderItems();
     }
 
@@ -1231,6 +1358,8 @@
     });
 
 
+    document.getElementById('activeCategory')?.addEventListener('change', renderWorkPresets);
+
     document.getElementById('importJsonInput')?.addEventListener('change', (event) => {
       const file = event.target.files?.[0];
       if (!file) return;
@@ -1238,6 +1367,7 @@
       event.target.value = '';
     });
 
+    renderWorkPresets();
     renderItems();
     renderSeal();
     renderHistory();
