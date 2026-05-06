@@ -155,14 +155,15 @@
 
     td input { padding: 8px; border-radius: 8px; }
     td textarea { min-height: 42px; padding: 8px; border-radius: 8px; font-size: 13px; }
-    .editor-table td:nth-child(1) { min-width: 150px; }
-    .editor-table td:nth-child(2) { min-width: 180px; }
-    .editor-table td:nth-child(3) { min-width: 240px; }
-    .editor-table td:nth-child(4) { width: 78px; }
-    .editor-table td:nth-child(5) { width: 76px; }
-    .editor-table td:nth-child(6) { width: 118px; }
-    .editor-table td:nth-child(7) { width: 124px; text-align: right; font-weight: 800; white-space: nowrap; }
-    .editor-table td:nth-child(8) { width: 54px; text-align: center; }
+    .editor-table td:nth-child(1) { min-width: 140px; }
+    .editor-table td:nth-child(2) { min-width: 160px; }
+    .editor-table td:nth-child(3) { min-width: 220px; }
+    .editor-table td:nth-child(4) { min-width: 180px; }
+    .editor-table td:nth-child(5) { width: 78px; }
+    .editor-table td:nth-child(6) { width: 76px; }
+    .editor-table td:nth-child(7) { width: 118px; }
+    .editor-table td:nth-child(8) { width: 124px; text-align: right; font-weight: 800; white-space: nowrap; }
+    .editor-table td:nth-child(9) { width: 54px; text-align: center; }
 
     .summary {
       display: grid;
@@ -471,6 +472,7 @@
                 <th>工種</th>
                 <th>工事項目</th>
                 <th>工事詳細</th>
+                <th>備考</th>
                 <th>数量</th>
                 <th>単位</th>
                 <th>単価</th>
@@ -618,10 +620,10 @@
     ];
 
     let items = [
-      { category: '塗装工事', name: '外壁塗装', detail: '高圧洗浄、下塗り、中塗り、上塗りを含む', qty: 1, unit: '式', price: '' },
-      { category: 'シーリング工事', name: 'シーリング打替', detail: '既存シーリング撤去、プライマー、新規打設、仕上げを含む', qty: 1, unit: '式', price: '' },
-      { category: '足場工事', name: '仮設足場', detail: '足場架け払い、養生メッシュ、安全対策を含む', qty: 1, unit: '式', price: '' },
-      { category: '付帯工事', name: '諸経費', detail: '現場管理費、交通費、軽微な消耗品費を含む', qty: 1, unit: '式', price: '' }
+      { category: '塗装工事', name: '外壁塗装', detail: '', remark: '', qty: 1, unit: '式', price: '' },
+      { category: 'シーリング工事', name: 'シーリング打替', detail: '', remark: '', qty: 1, unit: '式', price: '' },
+      { category: '足場工事', name: '仮設足場', detail: '', remark: '', qty: 1, unit: '式', price: '' },
+      { category: '付帯工事', name: '諸経費', detail: '', remark: '', qty: 1, unit: '式', price: '' }
     ];
 
     let sealImage = localStorage.getItem('constructionEstimateSeal') || '';
@@ -671,7 +673,8 @@
         tr.innerHTML = `
           <td><input value="${escapeHtml(item.category)}" oninput="updateItem(${index}, 'category', this.value)" placeholder="例：塗装工事" /></td>
           <td><input value="${escapeHtml(item.name)}" oninput="updateItem(${index}, 'name', this.value)" /></td>
-          <td><textarea oninput="updateItem(${index}, 'detail', this.value)">${escapeHtml(item.detail || '')}</textarea></td>
+          <td><textarea placeholder="工事内容を入力" oninput="updateItem(${index}, 'detail', this.value)">${escapeHtml(item.detail || '')}</textarea></td>
+          <td><textarea placeholder="備考・注意事項など" oninput="updateItem(${index}, 'remark', this.value)">${escapeHtml(item.remark || '')}</textarea></td>
           <td><input type="number" value="${item.qty}" min="0" step="0.1" oninput="updateItem(${index}, 'qty', this.value)" /></td>
           <td><input value="${escapeHtml(item.unit)}" oninput="updateItem(${index}, 'unit', this.value)" /></td>
           <td><input type="number" value="${item.price}" min="0" oninput="updateItem(${index}, 'price', this.value)" /></td>
@@ -752,8 +755,9 @@
           <table>
             <thead>
               <tr>
-                <th style="width:24%;">工事項目</th>
-                <th style="width:36%;">工事詳細</th>
+                <th style="width:18%;">工事項目</th>
+                <th style="width:30%;">工事詳細</th>
+                <th style="width:20%;">備考</th>
                 <th class="center" style="width:8%;">数量</th>
                 <th class="center" style="width:8%;">単位</th>
                 <th class="right" style="width:12%;">単価</th>
@@ -767,6 +771,7 @@
                   <tr>
                     <td>${escapeHtml(item.name)}</td>
                     <td class="preview-detail">${escapeHtml(item.detail || '')}</td>
+                    <td class="preview-detail">${escapeHtml(item.remark || '')}</td>
                     <td class="center">${item.qty}</td>
                     <td class="center">${escapeHtml(item.unit)}</td>
                     <td class="right">${yen(item.price)}</td>
@@ -806,12 +811,12 @@
     }
 
     function addItem() {
-      items.push({ category: 'その他工事', name: '', detail: '', qty: 1, unit: '式', price: 0 });
+      items.push({ category: 'その他工事', name: '', detail: '', remark: '', qty: 1, unit: '式', price: 0 });
       update();
     }
 
     function addPreset(category, name, detail, qty, unit, price) {
-      items.push({ category, name, detail, qty, unit, price });
+      items.push({ category, name, detail: '', remark: '', qty, unit, price });
       update();
     }
 
@@ -865,7 +870,7 @@
       Object.entries(data.fields || {}).forEach(([id, value]) => {
         if (document.getElementById(id)) document.getElementById(id).value = value;
       });
-      items = (data.items || items).map(item => ({ category: 'その他工事', detail: '', ...item }));
+      items = (data.items || items).map(item => ({ category: 'その他工事', detail: '', remark: '', ...item }));
       if (typeof data.sealEnabled === 'boolean') sealEnabled = data.sealEnabled;
       update();
     }
