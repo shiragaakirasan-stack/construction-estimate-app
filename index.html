@@ -155,13 +155,14 @@
 
     td input { padding: 8px; border-radius: 8px; }
     td textarea { min-height: 42px; padding: 8px; border-radius: 8px; font-size: 13px; }
-    .editor-table td:nth-child(1) { min-width: 190px; }
-    .editor-table td:nth-child(2) { min-width: 240px; }
-    .editor-table td:nth-child(3) { width: 78px; }
-    .editor-table td:nth-child(4) { width: 76px; }
-    .editor-table td:nth-child(5) { width: 118px; }
-    .editor-table td:nth-child(6) { width: 124px; text-align: right; font-weight: 800; white-space: nowrap; }
-    .editor-table td:nth-child(7) { width: 54px; text-align: center; }
+    .editor-table td:nth-child(1) { min-width: 150px; }
+    .editor-table td:nth-child(2) { min-width: 180px; }
+    .editor-table td:nth-child(3) { min-width: 240px; }
+    .editor-table td:nth-child(4) { width: 78px; }
+    .editor-table td:nth-child(5) { width: 76px; }
+    .editor-table td:nth-child(6) { width: 118px; }
+    .editor-table td:nth-child(7) { width: 124px; text-align: right; font-weight: 800; white-space: nowrap; }
+    .editor-table td:nth-child(8) { width: 54px; text-align: center; }
 
     .summary {
       display: grid;
@@ -302,6 +303,32 @@
       font-size: 13px;
     }
 
+    .estimate-page {
+      background: white;
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 2px dashed #cbd5e1;
+    }
+
+    .page-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-weight: 900;
+    }
+
+    .page-heading span:first-child { font-size: 18px; }
+    .category-total { color: #1e3a8a; font-size: 16px; }
+
+    .cover-label {
+      margin: 16px 0 8px;
+      font-weight: 900;
+      border-left: 5px solid #1e3a8a;
+      padding-left: 8px;
+    }
+
     .small-muted { color: var(--muted); font-size: 12px; }
 
     @media (max-width: 980px) {
@@ -333,6 +360,10 @@
       .preview table { font-size: 11px; page-break-inside: auto; }
       .preview table th, .preview table td { padding: 5px; }
       .preview tr { page-break-inside: avoid; page-break-after: auto; }
+      .estimate-page { break-before: page; page-break-before: always; border-top: 0; margin-top: 0; padding-top: 0; }
+      .estimate-page:first-of-type { break-before: auto; page-break-before: auto; }
+      .cover-label { font-size: 12px; margin: 10px 0 6px; }
+      .page-heading span:first-child { font-size: 16px; }
       .note-box { font-size: 11px; min-height: 48px; margin-top: 10px; }
       .company-box { font-size: 11px; min-height: 118px; }
       .client-name { font-size: 18px; }
@@ -438,6 +469,7 @@
           <table id="itemTable" class="editor-table">
             <thead>
               <tr>
+                <th>工種</th>
                 <th>工事項目</th>
                 <th>工事詳細</th>
                 <th>数量</th>
@@ -452,10 +484,23 @@
         </div>
         <div class="toolbar">
           <button onclick="addItem()">＋ 項目追加</button>
-          <button class="light" onclick="addPreset('解体撤去工事','既存内装材・不要部材の撤去、搬出、処分を含む',1,'式',50000)">解体</button>
-          <button class="light" onclick="addPreset('電気配線工事','照明・コンセントまわりの配線調整、器具取付を含む',1,'式',80000)">電気</button>
-          <button class="light" onclick="addPreset('クロス貼替工事','既存クロス撤去、下地調整、量産クロス貼り',50,'㎡',1800)">クロス</button>
-          <button class="light" onclick="addPreset('床仕上げ工事','下地調整、フロア材施工、端部処理を含む',30,'㎡',4500)">床</button>
+
+          <button class="light" onclick="addPreset('塗装工事','外壁塗装','高圧洗浄、下塗り、中塗り、上塗りを含む',1,'式',350000)">塗装</button>
+          <button class="light" onclick="addPreset('シーリング工事','シーリング打替','既存撤去、プライマー、新規打設、仕上げを含む',1,'式',180000)">シーリング</button>
+          <button class="light" onclick="addPreset('足場工事','仮設足場','足場架け払い、養生メッシュ、安全対策を含む',1,'式',220000)">足場</button>
+          <button class="light" onclick="addPreset('防水工事','屋上防水','下地調整、ウレタン防水、トップコート仕上げ',1,'式',280000)">防水</button>
+          <button class="light" onclick="addPreset('屋根工事','屋根補修','屋根材補修、板金調整、清掃を含む',1,'式',320000)">屋根</button>
+          <button class="light" onclick="addPreset('内装工事','クロス貼替','既存クロス撤去、下地調整、量産クロス貼り',50,'㎡',1800)">クロス</button>
+          <button class="light" onclick="addPreset('床工事','フロア施工','下地調整、フロア材施工、端部処理を含む',30,'㎡',4500)">床</button>
+          <button class="light" onclick="addPreset('解体工事','内装解体','既存内装材撤去、搬出、処分費込み',1,'式',250000)">解体</button>
+          <button class="light" onclick="addPreset('電気工事','照明交換','照明器具交換、配線接続、点灯確認',10,'箇所',12000)">電気</button>
+          <button class="light" onclick="addPreset('設備工事','給排水設備','配管調整、接続、漏水確認を含む',1,'式',180000)">設備</button>
+          <button class="light" onclick="addPreset('空調工事','エアコン設置','室内機・室外機設置、配管工事込み',2,'台',85000)">空調</button>
+          <button class="light" onclick="addPreset('外構工事','フェンス施工','基礎工事、フェンス設置、仕上げ込み',15,'m',22000)">外構</button>
+          <button class="light" onclick="addPreset('左官工事','モルタル補修','クラック補修、下地調整、仕上げ込み',1,'式',95000)">左官</button>
+          <button class="light" onclick="addPreset('大工工事','木下地工事','木材加工、下地組み、固定施工',1,'式',210000)">大工</button>
+          <button class="light" onclick="addPreset('清掃工事','竣工清掃','ガラス、床、共用部清掃込み',1,'式',55000)">清掃</button>
+          <button class="light" onclick="addPreset('付帯工事','諸経費','現場管理費、交通費、軽微な消耗品費を含む',1,'式',40000)">諸経費</button>
         </div>
       </div>
 
@@ -541,19 +586,17 @@
           <div>支払条件：<strong id="pPaymentTerms"></strong></div>
         </div>
 
+        <div class="cover-label">工種別内訳</div>
         <table>
           <thead>
             <tr>
-              <th style="width:22%;">工事項目</th>
-              <th style="width:34%;">工事詳細</th>
-              <th class="center" style="width:8%;">数量</th>
-              <th class="center" style="width:8%;">単位</th>
-              <th class="right" style="width:14%;">単価</th>
-              <th class="right" style="width:14%;">金額</th>
+              <th>工種</th>
+              <th class="right">小計</th>
             </tr>
           </thead>
-          <tbody id="pItemsBody"></tbody>
+          <tbody id="pCategorySummary"></tbody>
         </table>
+        <div id="detailPages"></div>
 
         <table style="width: 42%; margin-left: auto; margin-top: 14px;">
           <tbody>
@@ -576,10 +619,10 @@
     ];
 
     let items = [
-      { name: '仮設・養生工事', detail: '共用部・施工箇所の養生、搬入経路保護、簡易清掃を含む', qty: 1, unit: '式', price: 30000 },
-      { name: '内装下地工事', detail: '壁・床まわりの下地補修、軽微な不陸調整を含む', qty: 1, unit: '式', price: 120000 },
-      { name: '仕上げ工事', detail: '指定仕上げ材の施工、端部処理、施工後確認を含む', qty: 1, unit: '式', price: 180000 },
-      { name: '諸経費', detail: '現場管理費、交通費、軽微な消耗品費を含む', qty: 1, unit: '式', price: 40000 }
+      { category: '塗装工事', name: '外壁塗装', detail: '高圧洗浄、下塗り、中塗り、上塗りを含む', qty: 1, unit: '式', price: 350000 },
+      { category: 'シーリング工事', name: 'シーリング打替', detail: '既存シーリング撤去、プライマー、新規打設、仕上げを含む', qty: 1, unit: '式', price: 180000 },
+      { category: '足場工事', name: '仮設足場', detail: '足場架け払い、養生メッシュ、安全対策を含む', qty: 1, unit: '式', price: 220000 },
+      { category: '付帯工事', name: '諸経費', detail: '現場管理費、交通費、軽微な消耗品費を含む', qty: 1, unit: '式', price: 40000 }
     ];
 
     let sealImage = localStorage.getItem('constructionEstimateSeal') || '';
@@ -623,9 +666,11 @@
       const body = document.getElementById('itemsBody');
       body.innerHTML = '';
       items.forEach((item, index) => {
+        item.category = item.category || 'その他工事';
         const amount = Number(item.qty || 0) * Number(item.price || 0);
         const tr = document.createElement('tr');
         tr.innerHTML = `
+          <td><input value="${escapeHtml(item.category)}" oninput="updateItem(${index}, 'category', this.value)" placeholder="例：塗装工事" /></td>
           <td><input value="${escapeHtml(item.name)}" oninput="updateItem(${index}, 'name', this.value)" /></td>
           <td><textarea oninput="updateItem(${index}, 'detail', this.value)">${escapeHtml(item.detail || '')}</textarea></td>
           <td><input type="number" value="${item.qty}" min="0" step="0.1" oninput="updateItem(${index}, 'qty', this.value)" /></td>
@@ -636,6 +681,18 @@
         `;
         body.appendChild(tr);
       });
+    }
+
+    function getCategoryGroups() {
+      const groups = new Map();
+      items.forEach(item => {
+        const category = (item.category || 'その他工事').trim() || 'その他工事';
+        if (!groups.has(category)) groups.set(category, { total: 0, items: [] });
+        const amount = Number(item.qty || 0) * Number(item.price || 0);
+        groups.get(category).total += amount;
+        groups.get(category).items.push(item);
+      });
+      return groups;
     }
 
     function renderSeal() {
@@ -672,20 +729,56 @@
       document.getElementById('pIssueDate').textContent = formatDate(document.getElementById('issueDate').value);
       document.getElementById('pNotes').textContent = document.getElementById('notes').value;
 
-      const pBody = document.getElementById('pItemsBody');
-      pBody.innerHTML = '';
-      items.forEach(item => {
-        const amount = Number(item.qty || 0) * Number(item.price || 0);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${escapeHtml(item.name)}</td>
-          <td class="preview-detail">${escapeHtml(item.detail || '')}</td>
-          <td class="center">${item.qty}</td>
-          <td class="center">${escapeHtml(item.unit)}</td>
-          <td class="right">${yen(item.price)}</td>
-          <td class="right">${yen(amount)}</td>
+      const summaryBody = document.getElementById('pCategorySummary');
+      const detailPages = document.getElementById('detailPages');
+      summaryBody.innerHTML = '';
+      detailPages.innerHTML = '';
+
+      const groups = getCategoryGroups();
+      groups.forEach((group, category) => {
+        const sumTr = document.createElement('tr');
+        sumTr.innerHTML = `
+          <td>${escapeHtml(category)}</td>
+          <td class="right">${yen(group.total)}</td>
         `;
-        pBody.appendChild(tr);
+        summaryBody.appendChild(sumTr);
+
+        const page = document.createElement('div');
+        page.className = 'estimate-page';
+        page.innerHTML = `
+          <div class="page-heading">
+            <span>${escapeHtml(category)} 明細</span>
+            <span class="category-total">小計 ${yen(group.total)}</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:24%;">工事項目</th>
+                <th style="width:36%;">工事詳細</th>
+                <th class="center" style="width:8%;">数量</th>
+                <th class="center" style="width:8%;">単位</th>
+                <th class="right" style="width:12%;">単価</th>
+                <th class="right" style="width:12%;">金額</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${group.items.map(item => {
+                const amount = Number(item.qty || 0) * Number(item.price || 0);
+                return `
+                  <tr>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td class="preview-detail">${escapeHtml(item.detail || '')}</td>
+                    <td class="center">${item.qty}</td>
+                    <td class="center">${escapeHtml(item.unit)}</td>
+                    <td class="right">${yen(item.price)}</td>
+                    <td class="right">${yen(amount)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+        detailPages.appendChild(page);
       });
 
       const { subtotal, discount, tax, total } = calc();
@@ -714,12 +807,12 @@
     }
 
     function addItem() {
-      items.push({ name: '', detail: '', qty: 1, unit: '式', price: 0 });
+      items.push({ category: 'その他工事', name: '', detail: '', qty: 1, unit: '式', price: 0 });
       update();
     }
 
-    function addPreset(name, detail, qty, unit, price) {
-      items.push({ name, detail, qty, unit, price });
+    function addPreset(category, name, detail, qty, unit, price) {
+      items.push({ category, name, detail, qty, unit, price });
       update();
     }
 
@@ -773,7 +866,7 @@
       Object.entries(data.fields || {}).forEach(([id, value]) => {
         if (document.getElementById(id)) document.getElementById(id).value = value;
       });
-      items = (data.items || items).map(item => ({ detail: '', ...item }));
+      items = (data.items || items).map(item => ({ category: 'その他工事', detail: '', ...item }));
       if (typeof data.sealEnabled === 'boolean') sealEnabled = data.sealEnabled;
       update();
     }
