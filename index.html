@@ -15,6 +15,7 @@
       --main-dark: #1d4ed8;
       --danger: #dc2626;
       --soft: #eef4ff;
+      --success: #16a34a;
     }
 
     * { box-sizing: border-box; }
@@ -47,14 +48,10 @@
     main {
       width: min(1560px, 96vw);
       margin: 24px auto 48px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
     }
 
-    main.preview-open {
-      grid-template-columns: 1.15fr .85fr;
-    }
+    .screen { display: none; }
+    .screen.active { display: block; }
 
     .card {
       background: var(--card);
@@ -62,6 +59,7 @@
       border-radius: 16px;
       box-shadow: 0 10px 30px rgba(15, 23, 42, .07);
       padding: 18px;
+      margin-bottom: 18px;
     }
 
     h2 {
@@ -111,13 +109,20 @@
       border-color: var(--main);
     }
 
-    .section { margin-bottom: 18px; }
-
     .toolbar {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       margin-top: 14px;
+    }
+
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
     }
 
     button {
@@ -135,7 +140,8 @@
     button:hover { background: var(--main-dark); transform: translateY(-1px); }
     button.secondary { background: #334155; }
     button.light { background: var(--soft); color: #1e3a8a; }
-    button.danger { background: var(--danger); padding: 8px 10px; }
+    button.danger { background: var(--danger); }
+    button.success { background: var(--success); }
 
     table {
       width: 100%;
@@ -157,17 +163,34 @@
       background: #f8fafc;
     }
 
-    td input { padding: 10px; border-radius: 8px; font-size: 15px; }
-    td textarea { min-height: 46px; padding: 10px; border-radius: 8px; font-size: 14px; }
-    .editor-table td:nth-child(1) { min-width: 150px; }
-    .editor-table td:nth-child(2) { min-width: 180px; }
-    .editor-table td:nth-child(3) { min-width: 280px; }
-    .editor-table td:nth-child(4) { min-width: 230px; }
-    .editor-table td:nth-child(5) { min-width: 120px; }
-    .editor-table td:nth-child(6) { min-width: 100px; }
-    .editor-table td:nth-child(7) { min-width: 170px; }
-    .editor-table td:nth-child(8) { min-width: 160px; text-align: right; font-weight: 800; white-space: nowrap; }
-    .editor-table td:nth-child(9) { width: 64px; text-align: center; }
+    .table-wrap { overflow-x: auto; }
+
+    .editor-table {
+      min-width: 1320px;
+    }
+
+    .editor-table input {
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .editor-table textarea {
+      min-height: 52px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .editor-table th:nth-child(1), .editor-table td:nth-child(1) { min-width: 150px; }
+    .editor-table th:nth-child(2), .editor-table td:nth-child(2) { min-width: 180px; }
+    .editor-table th:nth-child(3), .editor-table td:nth-child(3) { min-width: 280px; }
+    .editor-table th:nth-child(4), .editor-table td:nth-child(4) { min-width: 230px; }
+    .editor-table th:nth-child(5), .editor-table td:nth-child(5) { min-width: 130px; }
+    .editor-table th:nth-child(6), .editor-table td:nth-child(6) { min-width: 110px; }
+    .editor-table th:nth-child(7), .editor-table td:nth-child(7) { min-width: 170px; }
+    .editor-table th:nth-child(8), .editor-table td:nth-child(8) { min-width: 160px; text-align: right; font-weight: 800; white-space: nowrap; }
+    .editor-table th:nth-child(9), .editor-table td:nth-child(9) { width: 72px; text-align: center; }
 
     .summary {
       display: grid;
@@ -210,6 +233,8 @@
       background: #f8fafc;
       overflow: hidden;
       margin-left: auto;
+      font-size: 12px;
+      color: var(--muted);
     }
 
     .seal-sample img {
@@ -218,27 +243,60 @@
       object-fit: contain;
     }
 
-    .preview {
-      background: white;
-      padding: 24px;
+    .small-muted { color: var(--muted); font-size: 12px; }
+
+    .history-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
       border: 1px solid var(--line);
-      min-height: 800px;
+      border-radius: 12px;
+      padding: 12px;
+      background: #f8fafc;
+    }
+
+    .history-title { font-weight: 900; }
+    .history-meta { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .history-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .hidden-file { display: none; }
+
+    .preview-shell {
+      background: #e5e7eb;
+      padding: 22px;
+      border-radius: 16px;
+      overflow-x: auto;
+    }
+
+    .preview-page {
+      background: white;
+      width: 297mm;
+      min-height: 210mm;
+      margin: 0 auto 22px;
+      padding: 12mm;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, .12);
       position: relative;
     }
 
     .estimate-title {
       text-align: center;
-      font-size: 30px;
+      font-size: 28px;
       letter-spacing: .25em;
       font-weight: 900;
-      margin-bottom: 22px;
+      margin: 0 0 18px;
     }
 
     .preview-top {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .client-name {
@@ -252,9 +310,9 @@
     .company-box {
       text-align: right;
       line-height: 1.7;
-      font-size: 13px;
+      font-size: 12px;
       position: relative;
-      min-height: 154px;
+      min-height: 126px;
       padding-right: 6px;
     }
 
@@ -262,8 +320,8 @@
       position: absolute;
       right: 0;
       bottom: 0;
-      width: 82px;
-      height: 82px;
+      width: 70px;
+      height: 70px;
       object-fit: contain;
       opacity: .88;
       pointer-events: none;
@@ -273,8 +331,8 @@
 
     .price-box {
       border: 3px solid #111827;
-      padding: 12px 14px;
-      margin: 16px 0;
+      padding: 10px 14px;
+      margin: 14px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -284,35 +342,37 @@
 
     .preview-meta {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px 18px;
-      font-size: 13px;
-      margin-bottom: 18px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px 14px;
+      font-size: 12px;
+      margin-bottom: 14px;
     }
 
-    .preview table th, .preview table td {
+    .preview-page table th,
+    .preview-page table td {
       border: 1px solid #cbd5e1;
-      padding: 7px;
+      padding: 6px;
     }
 
-    .preview table th { background: #e2e8f0; color: #0f172a; }
-    .preview-detail { white-space: pre-wrap; font-size: 12px; line-height: 1.55; }
+    .preview-page table th { background: #e2e8f0; color: #0f172a; }
+    .preview-detail { white-space: pre-wrap; font-size: 11px; line-height: 1.55; }
     .right { text-align: right; }
     .center { text-align: center; }
-    .note-box {
-      margin-top: 16px;
-      border: 1px solid #cbd5e1;
-      padding: 12px;
-      min-height: 64px;
-      white-space: pre-wrap;
-      font-size: 13px;
+
+    .cover-label {
+      margin: 14px 0 8px;
+      font-weight: 900;
+      border-left: 5px solid #1e3a8a;
+      padding-left: 8px;
     }
 
-    .estimate-page {
-      background: white;
-      margin-top: 18px;
-      padding-top: 18px;
-      border-top: 2px dashed #cbd5e1;
+    .note-box {
+      margin-top: 14px;
+      border: 1px solid #cbd5e1;
+      padding: 10px;
+      min-height: 54px;
+      white-space: pre-wrap;
+      font-size: 12px;
     }
 
     .page-heading {
@@ -327,30 +387,8 @@
     .page-heading span:first-child { font-size: 18px; }
     .category-total { color: #1e3a8a; font-size: 16px; }
 
-    .cover-label {
-      margin: 16px 0 8px;
-      font-weight: 900;
-      border-left: 5px solid #1e3a8a;
-      padding-left: 8px;
-    }
-
-    .small-muted { color: var(--muted); font-size: 12px; }
-
-    .preview-card {
-      display: none;
-    }
-
-    main.preview-open .preview-card {
-      display: block;
-    }
-
-    #previewToggleBtn.active {
-      background: #16a34a;
-    }
-
     @media (max-width: 980px) {
-      main { grid-template-columns: 1fr; }
-      .grid, .grid.three, .preview-top, .preview-meta, .seal-editor-box { grid-template-columns: 1fr; }
+      .grid, .grid.three, .seal-editor-box { grid-template-columns: 1fr; }
       .seal-sample { margin-left: 0; }
     }
 
@@ -360,106 +398,89 @@
     }
 
     @media print {
+      header, .no-print, #inputScreen, .top-actions { display: none !important; }
       body { background: white; }
-      header, .editor, .print-hide { display: none !important; }
-      main { display: block; width: 100%; margin: 0; }
-      .card { border: 0; box-shadow: none; padding: 0; }
-      .preview {
-        border: 0;
-        padding: 0;
+      main { width: 100%; margin: 0; }
+      #previewScreen { display: block !important; }
+      .preview-shell { background: white; padding: 0; border-radius: 0; overflow: visible; }
+      .preview-page {
+        width: auto;
         min-height: auto;
-        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+        page-break-after: always;
+        break-after: page;
       }
-      .estimate-title { font-size: 26px; margin-bottom: 14px; }
-      .preview-top { grid-template-columns: 1fr 1fr; margin-bottom: 10px; }
+      .preview-page:last-child { page-break-after: auto; break-after: auto; }
+      .estimate-title { font-size: 26px; margin-bottom: 12px; }
+      .preview-top { margin-bottom: 8px; }
       .price-box { font-size: 20px; margin: 10px 0; padding: 9px 12px; }
-      .preview-meta { grid-template-columns: repeat(4, 1fr); gap: 6px 12px; margin-bottom: 12px; }
-      .preview table { font-size: 11px; page-break-inside: auto; }
-      .preview table th, .preview table td { padding: 5px; }
-      .preview tr { page-break-inside: avoid; page-break-after: auto; }
-      .estimate-page { break-before: page; page-break-before: always; border-top: 0; margin-top: 0; padding-top: 0; }
-      .cover-label { font-size: 12px; margin: 10px 0 6px; }
-      .page-heading span:first-child { font-size: 16px; }
-      .note-box { font-size: 11px; min-height: 48px; margin-top: 10px; }
-      .company-box { font-size: 11px; min-height: 118px; }
+      .preview-meta { grid-template-columns: repeat(4, 1fr); gap: 6px 12px; margin-bottom: 10px; }
+      .preview-page table { font-size: 11px; page-break-inside: auto; }
+      .preview-page table th, .preview-page table td { padding: 5px; }
+      .preview-page tr { page-break-inside: avoid; page-break-after: auto; }
+      .note-box { font-size: 11px; min-height: 44px; margin-top: 10px; }
+      .company-box { font-size: 11px; min-height: 110px; }
       .client-name { font-size: 18px; }
-      .seal-on-preview { width: 68px; height: 68px; }
+      .seal-on-preview { width: 64px; height: 64px; }
     }
   </style>
 </head>
 <body>
-  <header>
+  <header class="no-print">
     <h1>工事見積書作成アプリ</h1>
-    <p>入力した内容が右側の見積書に即反映。印刷・PDF保存・データ保存まで対応。</p>
+    <p>入力画面と見積書プレビュー画面を分離。印刷・PDF保存・データ保存まで対応。</p>
   </header>
 
-  <main id="appMain">
-    <section class="card editor">
-      <div class="section">
+  <main>
+    <section id="inputScreen" class="screen active">
+      <div class="top-actions no-print">
+        <div>
+          <button class="success" onclick="showPreview()">見積書プレビュー画面へ</button>
+          <button class="secondary" onclick="saveData()">データ保存</button>
+          <button class="secondary" onclick="loadData()">保存データ読込</button>
+          <button class="light" onclick="downloadJson()">JSON書き出し</button>
+          <button class="light" onclick="document.getElementById('jsonImportInput').click()">JSON読込</button>
+          <input id="jsonImportInput" class="hidden-file" type="file" accept="application/json,.json" />
+          <button class="danger" onclick="resetData()">入力初期化</button>
+        </div>
+        <div class="small-muted">入力画面は横幅を広く使えます。PDF保存はプレビュー画面から行います。</div>
+      </div>
+
+      <div class="card">
+        <h2>保存履歴</h2>
+        <div id="historyList" class="history-list"></div>
+        <p class="small-muted">最大10件までこのブラウザ内に保存します。履歴から復元して修正できます。</p>
+      </div>
+
+      <div class="card">
         <h2>基本情報</h2>
         <div class="grid">
-          <div>
-            <label>見積番号</label>
-            <input id="estimateNo" value="EST-2026-001" />
-          </div>
-          <div>
-            <label>作成日</label>
-            <input id="issueDate" type="date" />
-          </div>
-          <div>
-            <label>お客様名</label>
-            <input id="clientName" value="〇〇 様" />
-          </div>
-          <div>
-            <label>件名</label>
-            <input id="projectName" value="内装改修工事" />
-          </div>
-          <div>
-            <label>工事場所</label>
-            <input id="siteAddress" value="大阪府大阪市〇〇区〇〇" />
-          </div>
-          <div>
-            <label>有効期限</label>
-            <input id="validUntil" value="発行日より30日間" />
-          </div>
-          <div>
-            <label>工期</label>
-            <input id="workPeriod" value="ご契約後、別途ご相談" />
-          </div>
-          <div>
-            <label>支払条件</label>
-            <input id="paymentTerms" value="着手金50％・完了後50％" />
-          </div>
+          <div><label>見積番号</label><input id="estimateNo" value="EST-2026-001" /></div>
+          <div><label>作成日</label><input id="issueDate" type="date" /></div>
+          <div><label>お客様名</label><input id="clientName" value="〇〇 様" /></div>
+          <div><label>件名</label><input id="projectName" value="内装改修工事" /></div>
+          <div><label>工事場所</label><input id="siteAddress" value="大阪府大阪市〇〇区〇〇" /></div>
+          <div><label>有効期限</label><input id="validUntil" value="発行日より30日間" /></div>
+          <div><label>工期</label><input id="workPeriod" value="ご契約後、別途ご相談" /></div>
+          <div><label>支払条件</label><input id="paymentTerms" value="着手金50％・完了後50％" /></div>
         </div>
       </div>
 
-      <div class="section">
+      <div class="card">
         <h2>自社情報</h2>
         <div class="grid">
-          <div>
-            <label>会社名・屋号</label>
-            <input id="companyName" value="株式会社サンプル工務店" />
-          </div>
-          <div>
-            <label>担当者</label>
-            <input id="staffName" value="山田 太郎" />
-          </div>
-          <div>
-            <label>電話番号</label>
-            <input id="tel" value="06-0000-0000" />
-          </div>
-          <div>
-            <label>メール</label>
-            <input id="email" value="info@example.com" />
-          </div>
-          <div style="grid-column: 1 / -1;">
-            <label>住所</label>
-            <input id="companyAddress" value="大阪府大阪市中央区〇〇 1-2-3" />
-          </div>
+          <div><label>会社名・屋号</label><input id="companyName" value="株式会社サンプル工務店" /></div>
+          <div><label>担当者</label><input id="staffName" value="山田 太郎" /></div>
+          <div><label>電話番号</label><input id="tel" value="06-0000-0000" /></div>
+          <div><label>メール</label><input id="email" value="info@example.com" /></div>
+          <div style="grid-column: 1 / -1;"><label>住所</label><input id="companyAddress" value="大阪府大阪市中央区〇〇 1-2-3" /></div>
         </div>
       </div>
 
-      <div class="section">
+      <div class="card">
         <h2>電子印鑑</h2>
         <div class="seal-editor-box">
           <div>
@@ -470,7 +491,7 @@
               <button class="secondary" onclick="saveSeal()" type="button">印鑑を保存</button>
               <button class="danger" onclick="clearSeal()" type="button">印鑑削除</button>
             </div>
-            <p class="small-muted">透過PNGの印鑑画像がおすすめです。登録した画像はこのブラウザ内に保存されます。</p>
+            <p class="small-muted">透過PNG推奨。登録画像はこのブラウザ内に保存されます。</p>
           </div>
           <div>
             <label>登録印鑑</label>
@@ -479,10 +500,10 @@
         </div>
       </div>
 
-      <div class="section">
+      <div class="card">
         <h2>明細</h2>
-        <div style="overflow-x:auto;">
-          <table id="itemTable" class="editor-table">
+        <div class="table-wrap">
+          <table class="editor-table">
             <thead>
               <tr>
                 <th>工種</th>
@@ -500,28 +521,27 @@
           </table>
         </div>
         <div class="toolbar">
-          <button onclick="addItem()">＋ 項目追加</button>
-
-          <button class="light" onclick="addPreset('塗装工事','外壁塗装','高圧洗浄、下塗り、中塗り、上塗りを含む',1,'式','')">塗装</button>
-          <button class="light" onclick="addPreset('シーリング工事','シーリング打替','既存撤去、プライマー、新規打設、仕上げを含む',1,'式','')">シーリング</button>
-          <button class="light" onclick="addPreset('足場工事','仮設足場','足場架け払い、養生メッシュ、安全対策を含む',1,'式','')">足場</button>
-          <button class="light" onclick="addPreset('防水工事','屋上防水','下地調整、ウレタン防水、トップコート仕上げ',1,'式','')">防水</button>
-          <button class="light" onclick="addPreset('屋根工事','屋根補修','屋根材補修、板金調整、清掃を含む',1,'式','')">屋根</button>
-          <button class="light" onclick="addPreset('内装工事','クロス貼替','既存クロス撤去、下地調整、量産クロス貼り',50,'㎡','')">クロス</button>
-          <button class="light" onclick="addPreset('床工事','フロア施工','下地調整、フロア材施工、端部処理を含む',30,'㎡','')">床</button>
-          <button class="light" onclick="addPreset('解体工事','内装解体','既存内装材撤去、搬出、処分費込み',1,'式','')">解体</button>
-          <button class="light" onclick="addPreset('電気工事','照明交換','照明器具交換、配線接続、点灯確認',10,'箇所','')">電気</button>
-          <button class="light" onclick="addPreset('設備工事','給排水設備','配管調整、接続、漏水確認を含む',1,'式','')">設備</button>
-          <button class="light" onclick="addPreset('空調工事','エアコン設置','室内機・室外機設置、配管工事込み',2,'台','')">空調</button>
-          <button class="light" onclick="addPreset('外構工事','フェンス施工','基礎工事、フェンス設置、仕上げ込み',15,'m','')">外構</button>
-          <button class="light" onclick="addPreset('左官工事','モルタル補修','クラック補修、下地調整、仕上げ込み',1,'式','')">左官</button>
-          <button class="light" onclick="addPreset('大工工事','木下地工事','木材加工、下地組み、固定施工',1,'式','')">大工</button>
-          <button class="light" onclick="addPreset('清掃工事','竣工清掃','ガラス、床、共用部清掃込み',1,'式','')">清掃</button>
-          <button class="light" onclick="addPreset('付帯工事','諸経費','現場管理費、交通費、軽微な消耗品費を含む',1,'式','')">諸経費</button>
+          <button onclick="addItem()">＋ 空行追加</button>
+          <button class="light" onclick="addPreset('塗装工事','外壁塗装',1,'式')">塗装</button>
+          <button class="light" onclick="addPreset('シーリング工事','シーリング打替',1,'式')">シーリング</button>
+          <button class="light" onclick="addPreset('足場工事','仮設足場',1,'式')">足場</button>
+          <button class="light" onclick="addPreset('防水工事','屋上防水',1,'式')">防水</button>
+          <button class="light" onclick="addPreset('屋根工事','屋根補修',1,'式')">屋根</button>
+          <button class="light" onclick="addPreset('内装工事','クロス貼替',1,'式')">内装</button>
+          <button class="light" onclick="addPreset('床工事','フロア施工',1,'式')">床</button>
+          <button class="light" onclick="addPreset('解体工事','内装解体',1,'式')">解体</button>
+          <button class="light" onclick="addPreset('電気工事','照明交換',1,'式')">電気</button>
+          <button class="light" onclick="addPreset('設備工事','給排水設備',1,'式')">設備</button>
+          <button class="light" onclick="addPreset('空調工事','エアコン設置',1,'式')">空調</button>
+          <button class="light" onclick="addPreset('外構工事','外構工事',1,'式')">外構</button>
+          <button class="light" onclick="addPreset('左官工事','モルタル補修',1,'式')">左官</button>
+          <button class="light" onclick="addPreset('大工工事','木下地工事',1,'式')">大工</button>
+          <button class="light" onclick="addPreset('清掃工事','竣工清掃',1,'式')">清掃</button>
+          <button class="light" onclick="addPreset('付帯工事','諸経費',1,'式')">諸経費</button>
         </div>
       </div>
 
-      <div class="section">
+      <div class="card">
         <h2>税・値引き</h2>
         <div class="grid three">
           <div>
@@ -532,10 +552,7 @@
               <option value="0">非課税</option>
             </select>
           </div>
-          <div>
-            <label>値引き額</label>
-            <input id="discount" type="number" value="0" min="0" />
-          </div>
+          <div><label>値引き額</label><input id="discount" type="number" value="0" min="0" /></div>
           <div>
             <label>端数処理</label>
             <select id="roundMode">
@@ -553,80 +570,23 @@
         </div>
       </div>
 
-      <div class="section">
+      <div class="card">
         <h2>備考</h2>
         <textarea id="notes">・上記金額には材料費・施工費を含みます。
 ・現地状況により内容が変更となる場合がございます。
 ・追加工事が発生する場合は、事前にご相談いたします。</textarea>
       </div>
-
-      <div class="toolbar print-hide">
-        <button id="previewToggleBtn" class="light" onclick="togglePreview()" type="button">見積書プレビュー表示</button>
-        <button onclick="window.print()">印刷 / PDF保存</button>
-        <button class="secondary" onclick="saveData()">データ保存</button>
-        <button class="secondary" onclick="loadData()">保存データ読込</button>
-        <button class="danger" onclick="resetData()">初期化</button>
-      </div>
-      <p class="small-muted print-hide">PDF保存は「印刷」から送信先を「PDFに保存」にすると作成できます。用紙設定はA4横向きになります。</p>
     </section>
 
-    <section class="card preview-card">
-      <div class="preview" id="preview">
-        <div class="estimate-title">御見積書</div>
-        <div class="preview-top">
-          <div>
-            <div class="client-name" id="pClientName"></div>
-            <p>下記の通り御見積申し上げます。</p>
-          </div>
-          <div class="company-box">
-            <div>見積番号：<span id="pEstimateNo"></span></div>
-            <div>作成日：<span id="pIssueDate"></span></div>
-            <br />
-            <strong id="pCompanyName"></strong><br />
-            <span id="pCompanyAddress"></span><br />
-            TEL：<span id="pTel"></span><br />
-            Mail：<span id="pEmail"></span><br />
-            担当：<span id="pStaffName"></span>
-            <img id="pSeal" class="seal-on-preview seal-hidden" alt="電子印鑑" />
-          </div>
+    <section id="previewScreen" class="screen">
+      <div class="top-actions no-print">
+        <div>
+          <button class="secondary" onclick="showInput()">入力画面へ戻る</button>
+          <button class="success" onclick="window.print()">印刷 / PDF保存</button>
         </div>
-
-        <div class="price-box">
-          <span>御見積金額</span>
-          <span id="pGrandTotal">¥0</span>
-        </div>
-
-        <div class="preview-meta">
-          <div>件名：<strong id="pProjectName"></strong></div>
-          <div>工事場所：<strong id="pSiteAddress"></strong></div>
-          <div>有効期限：<strong id="pValidUntil"></strong></div>
-          <div>工期：<strong id="pWorkPeriod"></strong></div>
-          <div>支払条件：<strong id="pPaymentTerms"></strong></div>
-        </div>
-
-        <div class="cover-label">工種別内訳</div>
-        <table>
-          <thead>
-            <tr>
-              <th>工種</th>
-              <th class="right">小計</th>
-            </tr>
-          </thead>
-          <tbody id="pCategorySummary"></tbody>
-        </table>
-        <div id="detailPages"></div>
-
-        <table style="width: 42%; margin-left: auto; margin-top: 14px;">
-          <tbody>
-            <tr><th>小計</th><td class="right" id="pSubtotal">¥0</td></tr>
-            <tr><th>値引き</th><td class="right" id="pDiscount">¥0</td></tr>
-            <tr><th>消費税</th><td class="right" id="pTax">¥0</td></tr>
-            <tr><th>合計</th><td class="right" id="pTotal" style="font-weight:900;">¥0</td></tr>
-          </tbody>
-        </table>
-
-        <div class="note-box" id="pNotes"></div>
+        <div class="small-muted">PDF保存時は印刷画面の「ヘッダーとフッター」をOFFにするとURLが消えます。</div>
       </div>
+      <div class="preview-shell" id="previewRoot"></div>
     </section>
   </main>
 
@@ -636,12 +596,15 @@
       'companyName','staffName','tel','email','companyAddress','taxRate','discount','roundMode','notes'
     ];
 
-    let items = [
-      { category: '塗装工事', name: '外壁塗装', detail: '', remark: '', qty: 1, unit: '式', price: '' },
-      { category: 'シーリング工事', name: 'シーリング打替', detail: '', remark: '', qty: 1, unit: '式', price: '' },
-      { category: '足場工事', name: '仮設足場', detail: '', remark: '', qty: 1, unit: '式', price: '' },
-      { category: '付帯工事', name: '諸経費', detail: '', remark: '', qty: 1, unit: '式', price: '' }
-    ];
+    const STORAGE_KEY = 'constructionEstimateData';
+    const HISTORY_KEY = 'constructionEstimateHistory';
+    const HISTORY_LIMIT = 10;
+
+    function blankItem() {
+      return { category: '', name: '', detail: '', remark: '', qty: '', unit: '', price: '' };
+    }
+
+    let items = [blankItem()];
 
     let sealImage = localStorage.getItem('constructionEstimateSeal') || '';
     let sealEnabled = localStorage.getItem('constructionEstimateSealEnabled') === 'true';
@@ -664,6 +627,15 @@
       return `${y}年${Number(m)}月${Number(d)}日`;
     }
 
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
     function roundByMode(value) {
       const mode = document.getElementById('roundMode').value;
       if (mode === 'floor') return Math.floor(value);
@@ -680,26 +652,8 @@
       return { subtotal, discount, tax, total };
     }
 
-    function renderItems() {
-      const body = document.getElementById('itemsBody');
-      body.innerHTML = '';
-      items.forEach((item, index) => {
-        item.category = item.category || 'その他工事';
-        const amount = Number(item.qty || 0) * Number(item.price || 0);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><input value="${escapeHtml(item.category)}" oninput="updateItem(${index}, 'category', this.value)" placeholder="例：塗装工事" /></td>
-          <td><input value="${escapeHtml(item.name)}" oninput="updateItem(${index}, 'name', this.value)" /></td>
-          <td><textarea placeholder="工事内容を入力" oninput="updateItem(${index}, 'detail', this.value)">${escapeHtml(item.detail || '')}</textarea></td>
-          <td><textarea placeholder="備考・注意事項など" oninput="updateItem(${index}, 'remark', this.value)">${escapeHtml(item.remark || '')}</textarea></td>
-          <td><input type="number" value="${item.qty}" min="0" step="0.1" oninput="updateItem(${index}, 'qty', this.value)" /></td>
-          <td><input value="${escapeHtml(item.unit)}" oninput="updateItem(${index}, 'unit', this.value)" /></td>
-          <td><input type="number" value="${item.price}" min="0" oninput="updateItem(${index}, 'price', this.value)" /></td>
-          <td>${yen(amount)}</td>
-          <td><button class="danger" onclick="removeItem(${index})">削除</button></td>
-        `;
-        body.appendChild(tr);
-      });
+    function getValue(id) {
+      return document.getElementById(id)?.value || '';
     }
 
     function getCategoryGroups() {
@@ -714,57 +668,65 @@
       return groups;
     }
 
+    function renderItems() {
+      const body = document.getElementById('itemsBody');
+      body.innerHTML = '';
+      items.forEach((item, index) => {
+        const amount = Number(item.qty || 0) * Number(item.price || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input value="${escapeHtml(item.category)}" oninput="updateItem(${index}, 'category', this.value)" placeholder="例：塗装工事" /></td>
+          <td><input value="${escapeHtml(item.name)}" oninput="updateItem(${index}, 'name', this.value)" placeholder="例：外壁塗装" /></td>
+          <td><textarea placeholder="工事内容を入力" oninput="updateItem(${index}, 'detail', this.value)">${escapeHtml(item.detail || '')}</textarea></td>
+          <td><textarea placeholder="備考・注意事項など" oninput="updateItem(${index}, 'remark', this.value)">${escapeHtml(item.remark || '')}</textarea></td>
+          <td><input type="number" value="${item.qty}" min="0" step="0.1" oninput="updateItem(${index}, 'qty', this.value)" /></td>
+          <td><input value="${escapeHtml(item.unit)}" oninput="updateItem(${index}, 'unit', this.value)" /></td>
+          <td><input type="number" value="${item.price}" min="0" oninput="updateItem(${index}, 'price', this.value)" placeholder="0" /></td>
+          <td>${yen(amount)}</td>
+          <td><button class="danger" onclick="removeItem(${index})">削除</button></td>
+        `;
+        body.appendChild(tr);
+      });
+      renderSummary();
+    }
+
+    function renderSummary() {
+      const { subtotal, discount, tax, total } = calc();
+      document.getElementById('sumSubtotal').textContent = yen(subtotal);
+      document.getElementById('sumDiscount').textContent = '-' + yen(discount);
+      document.getElementById('sumTax').textContent = yen(tax);
+      document.getElementById('sumTotal').textContent = yen(total);
+    }
+
     function renderSeal() {
       const sample = document.getElementById('sealSample');
-      const pSeal = document.getElementById('pSeal');
       const toggleBtn = document.getElementById('sealToggleBtn');
-
       if (sealImage) {
         sample.innerHTML = `<img src="${sealImage}" alt="登録印鑑" />`;
-        pSeal.src = sealImage;
       } else {
         sample.textContent = '未登録';
-        pSeal.removeAttribute('src');
       }
-
-      if (sealImage && sealEnabled) {
-        pSeal.classList.remove('seal-hidden');
-        toggleBtn.textContent = '押印を外す';
-      } else {
-        pSeal.classList.add('seal-hidden');
-        toggleBtn.textContent = '押印する';
-      }
+      toggleBtn.textContent = sealEnabled ? '押印を外す' : '押印する';
     }
 
     function renderPreview() {
-      const ids = {
-        pEstimateNo: 'estimateNo', pClientName: 'clientName', pProjectName: 'projectName', pSiteAddress: 'siteAddress',
-        pValidUntil: 'validUntil', pWorkPeriod: 'workPeriod', pPaymentTerms: 'paymentTerms', pCompanyName: 'companyName',
-        pCompanyAddress: 'companyAddress', pTel: 'tel', pEmail: 'email', pStaffName: 'staffName'
-      };
-      Object.entries(ids).forEach(([previewId, inputId]) => {
-        document.getElementById(previewId).textContent = document.getElementById(inputId).value;
-      });
-      document.getElementById('pIssueDate').textContent = formatDate(document.getElementById('issueDate').value);
-      document.getElementById('pNotes').textContent = document.getElementById('notes').value;
-
-      const summaryBody = document.getElementById('pCategorySummary');
-      const detailPages = document.getElementById('detailPages');
-      summaryBody.innerHTML = '';
-      detailPages.innerHTML = '';
-
+      const root = document.getElementById('previewRoot');
+      const { subtotal, discount, tax, total } = calc();
       const groups = getCategoryGroups();
-      groups.forEach((group, category) => {
-        const sumTr = document.createElement('tr');
-        sumTr.innerHTML = `
+
+      const sealTag = sealImage && sealEnabled
+        ? `<img src="${sealImage}" class="seal-on-preview" alt="電子印鑑" />`
+        : '';
+
+      const coverRows = Array.from(groups.entries()).map(([category, group]) => `
+        <tr>
           <td>${escapeHtml(category)}</td>
           <td class="right">${yen(group.total)}</td>
-        `;
-        summaryBody.appendChild(sumTr);
+        </tr>
+      `).join('');
 
-        const page = document.createElement('div');
-        page.className = 'estimate-page';
-        page.innerHTML = `
+      const detailPages = Array.from(groups.entries()).map(([category, group]) => `
+        <div class="preview-page">
           <div class="page-heading">
             <span>${escapeHtml(category)} 明細</span>
             <span class="category-total">小計 ${yen(group.total)}</span>
@@ -773,12 +735,12 @@
             <thead>
               <tr>
                 <th style="width:18%;">工事項目</th>
-                <th style="width:30%;">工事詳細</th>
+                <th style="width:28%;">工事詳細</th>
                 <th style="width:20%;">備考</th>
                 <th class="center" style="width:8%;">数量</th>
                 <th class="center" style="width:8%;">単位</th>
-                <th class="right" style="width:12%;">単価</th>
-                <th class="right" style="width:12%;">金額</th>
+                <th class="right" style="width:9%;">単価</th>
+                <th class="right" style="width:9%;">金額</th>
               </tr>
             </thead>
             <tbody>
@@ -789,7 +751,7 @@
                     <td>${escapeHtml(item.name)}</td>
                     <td class="preview-detail">${escapeHtml(item.detail || '')}</td>
                     <td class="preview-detail">${escapeHtml(item.remark || '')}</td>
-                    <td class="center">${item.qty}</td>
+                    <td class="center">${escapeHtml(item.qty)}</td>
                     <td class="center">${escapeHtml(item.unit)}</td>
                     <td class="right">${yen(item.price)}</td>
                     <td class="right">${yen(amount)}</td>
@@ -798,58 +760,97 @@
               }).join('')}
             </tbody>
           </table>
-        `;
-        detailPages.appendChild(page);
-      });
+        </div>
+      `).join('');
 
-      const { subtotal, discount, tax, total } = calc();
-      document.getElementById('sumSubtotal').textContent = yen(subtotal);
-      document.getElementById('sumDiscount').textContent = '-' + yen(discount);
-      document.getElementById('sumTax').textContent = yen(tax);
-      document.getElementById('sumTotal').textContent = yen(total);
+      root.innerHTML = `
+        <div class="preview-page">
+          <div class="estimate-title">御見積書</div>
+          <div class="preview-top">
+            <div>
+              <div class="client-name">${escapeHtml(getValue('clientName'))}</div>
+              <p>下記の通り御見積申し上げます。</p>
+            </div>
+            <div class="company-box">
+              <div>見積番号：${escapeHtml(getValue('estimateNo'))}</div>
+              <div>作成日：${escapeHtml(formatDate(getValue('issueDate')))}</div>
+              <br />
+              <strong>${escapeHtml(getValue('companyName'))}</strong><br />
+              ${escapeHtml(getValue('companyAddress'))}<br />
+              TEL：${escapeHtml(getValue('tel'))}<br />
+              Mail：${escapeHtml(getValue('email'))}<br />
+              担当：${escapeHtml(getValue('staffName'))}
+              ${sealTag}
+            </div>
+          </div>
 
-      document.getElementById('pSubtotal').textContent = yen(subtotal);
-      document.getElementById('pDiscount').textContent = '-' + yen(discount);
-      document.getElementById('pTax').textContent = yen(tax);
-      document.getElementById('pTotal').textContent = yen(total);
-      document.getElementById('pGrandTotal').textContent = yen(total);
-      renderSeal();
-    }
+          <div class="price-box">
+            <span>御見積金額</span>
+            <span>${yen(total)}</span>
+          </div>
 
-    function update() {
-      renderItems();
-      renderPreview();
-    }
+          <div class="preview-meta">
+            <div>件名：<strong>${escapeHtml(getValue('projectName'))}</strong></div>
+            <div>工事場所：<strong>${escapeHtml(getValue('siteAddress'))}</strong></div>
+            <div>有効期限：<strong>${escapeHtml(getValue('validUntil'))}</strong></div>
+            <div>工期：<strong>${escapeHtml(getValue('workPeriod'))}</strong></div>
+            <div>支払条件：<strong>${escapeHtml(getValue('paymentTerms'))}</strong></div>
+          </div>
 
-    function togglePreview() {
-      const main = document.getElementById('appMain');
-      const btn = document.getElementById('previewToggleBtn');
-      main.classList.toggle('preview-open');
-      const isOpen = main.classList.contains('preview-open');
-      btn.textContent = isOpen ? '見積書プレビュー非表示' : '見積書プレビュー表示';
-      btn.classList.toggle('active', isOpen);
-      renderPreview();
+          <div class="cover-label">工種別内訳</div>
+          <table>
+            <thead>
+              <tr><th>工種</th><th class="right">小計</th></tr>
+            </thead>
+            <tbody>${coverRows}</tbody>
+          </table>
+
+          <table style="width: 42%; margin-left: auto; margin-top: 14px;">
+            <tbody>
+              <tr><th>小計</th><td class="right">${yen(subtotal)}</td></tr>
+              <tr><th>値引き</th><td class="right">-${yen(discount)}</td></tr>
+              <tr><th>消費税</th><td class="right">${yen(tax)}</td></tr>
+              <tr><th>合計</th><td class="right" style="font-weight:900;">${yen(total)}</td></tr>
+            </tbody>
+          </table>
+
+          <div class="note-box">${escapeHtml(getValue('notes'))}</div>
+        </div>
+        ${detailPages}
+      `;
     }
 
     function updateItem(index, key, value) {
       items[index][key] = value;
-      renderPreview();
       renderItems();
     }
 
     function addItem() {
-      items.push({ category: 'その他工事', name: '', detail: '', remark: '', qty: 1, unit: '式', price: 0 });
-      update();
+      items.push({ category: 'その他工事', name: '', detail: '', remark: '', qty: 1, unit: '式', price: '' });
+      renderItems();
     }
 
-    function addPreset(category, name, detail, qty, unit, price) {
-      items.push({ category, name, detail: '', remark: '', qty, unit, price });
-      update();
+    function addPreset(category, name, qty, unit) {
+      items.push({ category, name, detail: '', remark: '', qty, unit, price: '' });
+      renderItems();
     }
 
     function removeItem(index) {
       items.splice(index, 1);
-      update();
+      renderItems();
+    }
+
+    function showPreview() {
+      renderPreview();
+      document.getElementById('inputScreen').classList.remove('active');
+      document.getElementById('previewScreen').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showInput() {
+      document.getElementById('previewScreen').classList.remove('active');
+      document.getElementById('inputScreen').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function toggleSeal() {
@@ -882,44 +883,173 @@
       renderSeal();
     }
 
-    function saveData() {
-      const data = { fields: {}, items, sealEnabled };
-      fields.forEach(id => data.fields[id] = document.getElementById(id).value);
-      localStorage.setItem('constructionEstimateData', JSON.stringify(data));
-      localStorage.setItem('constructionEstimateSealEnabled', String(sealEnabled));
-      alert('保存しました');
+    function makeSnapshot() {
+      const totals = calc();
+      const snapshot = {
+        version: 2,
+        savedAt: new Date().toISOString(),
+        fields: {},
+        items: items.map(item => ({ ...blankItem(), ...item })),
+        sealEnabled,
+        totals
+      };
+      fields.forEach(id => snapshot.fields[id] = getValue(id));
+      return snapshot;
     }
 
-    function loadData() {
-      const raw = localStorage.getItem('constructionEstimateData');
-      if (!raw) return alert('保存データがありません');
-      const data = JSON.parse(raw);
+    function applySnapshot(data) {
+      if (!data || typeof data !== 'object') throw new Error('invalid data');
       Object.entries(data.fields || {}).forEach(([id, value]) => {
         if (document.getElementById(id)) document.getElementById(id).value = value;
       });
-      items = (data.items || items).map(item => ({ category: 'その他工事', detail: '', remark: '', ...item }));
+      items = (Array.isArray(data.items) && data.items.length ? data.items : [blankItem()])
+        .map(item => ({ ...blankItem(), ...item }));
       if (typeof data.sealEnabled === 'boolean') sealEnabled = data.sealEnabled;
-      update();
+      localStorage.setItem('constructionEstimateSealEnabled', String(sealEnabled));
+      renderItems();
+      renderSeal();
+      renderHistory();
+    }
+
+    function getHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function setHistory(history) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, HISTORY_LIMIT)));
+      renderHistory();
+    }
+
+    function addToHistory(snapshot) {
+      const history = getHistory();
+      history.unshift(snapshot);
+      setHistory(history.slice(0, HISTORY_LIMIT));
+    }
+
+    function saveData() {
+      const data = makeSnapshot();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      localStorage.setItem('constructionEstimateSealEnabled', String(sealEnabled));
+      addToHistory(data);
+      alert('保存しました。履歴にも追加しました');
+    }
+
+    function loadData() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return alert('保存データがありません');
+      try {
+        applySnapshot(JSON.parse(raw));
+      } catch {
+        alert('保存データの読込に失敗しました');
+      }
+    }
+
+    function restoreHistory(index) {
+      const history = getHistory();
+      const data = history[index];
+      if (!data) return alert('履歴データが見つかりません');
+      if (!confirm('この履歴を復元しますか？ 現在の入力内容は上書きされます。')) return;
+      applySnapshot(data);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      alert('履歴を復元しました。修正して再保存できます');
+    }
+
+    function deleteHistory(index) {
+      if (!confirm('この履歴を削除しますか？')) return;
+      const history = getHistory();
+      history.splice(index, 1);
+      setHistory(history);
+    }
+
+    function renderHistory() {
+      const box = document.getElementById('historyList');
+      if (!box) return;
+      const history = getHistory();
+      if (!history.length) {
+        box.innerHTML = '<div class="small-muted">保存履歴はまだありません。</div>';
+        return;
+      }
+      box.innerHTML = history.map((data, index) => {
+        const f = data.fields || {};
+        const saved = data.savedAt ? new Date(data.savedAt).toLocaleString('ja-JP') : '日時不明';
+        const title = `${escapeHtml(f.estimateNo || '見積番号なし')} / ${escapeHtml(f.clientName || 'お客様名なし')}`;
+        const meta = `${escapeHtml(f.projectName || '件名なし')}　${saved}　合計 ${yen(data.totals?.total || 0)}`;
+        return `
+          <div class="history-item">
+            <div>
+              <div class="history-title">${title}</div>
+              <div class="history-meta">${meta}</div>
+            </div>
+            <div class="history-actions">
+              <button class="light" onclick="restoreHistory(${index})">復元</button>
+              <button class="danger" onclick="deleteHistory(${index})">削除</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function safeFileName(text) {
+      return String(text || '')
+        .replace(/[\\/:*?"<>|]/g, '-')
+        .replace(/\s+/g, '')
+        .slice(0, 40) || 'estimate';
+    }
+
+    function downloadJson() {
+      const data = makeSnapshot();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const no = safeFileName(data.fields.estimateNo || '見積書');
+      const client = safeFileName(data.fields.clientName || 'お客様');
+      a.href = url;
+      a.download = `${no}_${client}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function importJsonFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          applySnapshot(data);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          addToHistory({ ...data, savedAt: new Date().toISOString() });
+          alert('JSONから見積書を復元しました');
+        } catch {
+          alert('JSONファイルの読込に失敗しました');
+        } finally {
+          document.getElementById('jsonImportInput').value = '';
+        }
+      };
+      reader.readAsText(file);
     }
 
     function resetData() {
       if (!confirm('入力内容を初期化しますか？ 印鑑登録は残ります。')) return;
-      localStorage.removeItem('constructionEstimateData');
+      localStorage.removeItem(STORAGE_KEY);
       location.reload();
     }
 
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
     document.getElementById('issueDate').value = today();
-    fields.forEach(id => document.getElementById(id).addEventListener('input', renderPreview));
-    fields.forEach(id => document.getElementById(id).addEventListener('change', renderPreview));
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', renderSummary);
+      el.addEventListener('change', renderSummary);
+    });
+
+    document.getElementById('jsonImportInput').addEventListener('change', (event) => {
+      importJsonFile(event.target.files?.[0]);
+    });
 
     document.getElementById('sealInput').addEventListener('change', (event) => {
       const file = event.target.files?.[0];
@@ -935,7 +1065,9 @@
       reader.readAsDataURL(file);
     });
 
-    update();
+    renderItems();
+    renderSeal();
+    renderHistory();
   </script>
 </body>
 </html>
