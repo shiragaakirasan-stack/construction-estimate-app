@@ -455,6 +455,31 @@
         <p class="small-muted">最大10件までこのブラウザ内に保存します。履歴から復元して修正できます。</p>
       </div>
 
+      
+      <div class="card">
+        <h2>保存履歴</h2>
+        <div class="toolbar">
+          <button class="secondary" onclick="exportJson()">JSON書き出し</button>
+          <button class="light" onclick="document.getElementById('importJsonInput').click()">JSON読込</button>
+          <input id="importJsonInput" type="file" accept="application/json,.json" style="display:none" />
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>保存日時</th>
+                <th>件名</th>
+                <th>お客様名</th>
+                <th>合計</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+
       <div class="card">
         <h2>基本情報</h2>
         <div class="grid">
@@ -671,22 +696,43 @@
     function renderItems() {
       const body = document.getElementById('itemsBody');
       body.innerHTML = '';
+
       items.forEach((item, index) => {
         const amount = Number(item.qty || 0) * Number(item.price || 0);
         const tr = document.createElement('tr');
+        tr.dataset.index = index;
+
         tr.innerHTML = `
-          <td><input value="${escapeHtml(item.category)}" oninput="updateItem(${index}, 'category', this.value)" placeholder="例：塗装工事" /></td>
-          <td><input value="${escapeHtml(item.name)}" oninput="updateItem(${index}, 'name', this.value)" placeholder="例：外壁塗装" /></td>
-          <td><textarea placeholder="工事内容を入力" oninput="updateItem(${index}, 'detail', this.value)">${escapeHtml(item.detail || '')}</textarea></td>
-          <td><textarea placeholder="備考・注意事項など" oninput="updateItem(${index}, 'remark', this.value)">${escapeHtml(item.remark || '')}</textarea></td>
-          <td><input type="number" value="${item.qty}" min="0" step="0.1" oninput="updateItem(${index}, 'qty', this.value)" /></td>
-          <td><input value="${escapeHtml(item.unit)}" oninput="updateItem(${index}, 'unit', this.value)" /></td>
-          <td><input type="number" value="${item.price}" min="0" oninput="updateItem(${index}, 'price', this.value)" placeholder="0" /></td>
-          <td data-amount-index="${index}">${yen(amount)}</td>
-          <td><button class="danger" onclick="removeItem(${index})">削除</button></td>
+          <td><input data-key="category" value="${escapeHtml(item.category || '')}" placeholder="例：塗装工事" /></td>
+          <td><input data-key="name" value="${escapeHtml(item.name || '')}" placeholder="例：外壁塗装" /></td>
+          <td><textarea data-key="detail" placeholder="工事内容を入力">${escapeHtml(item.detail || '')}</textarea></td>
+          <td><textarea data-key="remark" placeholder="備考・注意事項など">${escapeHtml(item.remark || '')}</textarea></td>
+          <td><input data-key="qty" type="number" value="${escapeHtml(item.qty || '')}" min="0" step="0.1" /></td>
+          <td><input data-key="unit" value="${escapeHtml(item.unit || '')}" /></td>
+          <td><input data-key="price" type="number" value="${escapeHtml(item.price || '')}" min="0" placeholder="0" /></td>
+          <td data-amount>${yen(amount)}</td>
+          <td><button class="danger" type="button" onclick="removeItem(${index})">削除</button></td>
         `;
+
+        tr.querySelectorAll('input, textarea').forEach(el => {
+          el.addEventListener('input', () => {
+            const key = el.dataset.key;
+            items[index][key] = el.value;
+
+            if (key === 'qty' || key === 'price') {
+              const amountCell = tr.querySelector('[data-amount]');
+              const current = items[index];
+              const rowAmount = Number(current.qty || 0) * Number(current.price || 0);
+              amountCell.textContent = yen(rowAmount);
+            }
+
+            renderSummary();
+          });
+        });
+
         body.appendChild(tr);
       });
+
       renderSummary();
     }
 
@@ -823,22 +869,7 @@
     function updateItem(index, key, value) {
       if (!items[index]) return;
       items[index][key] = value;
-
-      // 入力中に表全体を再描画しない。
-      // これで工種・項目・詳細・備考・数量・単位・単価を連続入力できる。
-      if (key === 'qty' || key === 'price') {
-        const amountCell = document.querySelector(`[data-amount-index="${index}"]`);
-        if (amountCell) {
-          const item = items[index];
-          const amount = Number(item.qty || 0) * Number(item.price || 0);
-          amountCell.textContent = yen(amount);
-        }
-      }
-
       renderSummary();
-    }
-
-      renderItems();
     }
 
     function addItem() {
@@ -946,22 +977,140 @@
       setHistory(history.slice(0, HISTORY_LIMIT));
     }
 
+
+    function collectData() {
+      const data = {
+        version: 2,
+        savedAt: new Date().toISOString(),
+        fields: {},
+        items: items.map(item => ({ category: '', name: '', detail: '', remark: '', qty: '', unit: '', price: '', ...item })),
+        sealEnabled
+      };
+      fields.forEach(id => data.fields[id] = getValue(id));
+      return data;
+    }
+
+    function applyData(data) {
+      Object.entries(data.fields || {}).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+      });
+      items = (data.items || []).map(item => ({ category: '', name: '', detail: '', remark: '', qty: '', unit: '', price: '', ...item }));
+      if (typeof data.sealEnabled === 'boolean') sealEnabled = data.sealEnabled;
+      renderItems();
+      renderSeal();
+      renderHistory();
+    }
+
+    function getHistory() {
+      try {
+        return JSON.parse(localStorage.getItem('constructionEstimateHistory') || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function addHistory(data) {
+      const history = getHistory();
+      const snapshot = JSON.parse(JSON.stringify(data));
+      snapshot.savedAt = new Date().toISOString();
+      history.unshift(snapshot);
+      localStorage.setItem('constructionEstimateHistory', JSON.stringify(history.slice(0, 10)));
+    }
+
+    function loadHistory(index) {
+      const history = getHistory();
+      if (!history[index]) return alert('履歴が見つかりません');
+      applyData(history[index]);
+      localStorage.setItem('constructionEstimateData', JSON.stringify(history[index]));
+      alert('履歴から復元しました');
+    }
+
+    function deleteHistory(index) {
+      if (!confirm('この履歴を削除しますか？')) return;
+      const history = getHistory();
+      history.splice(index, 1);
+      localStorage.setItem('constructionEstimateHistory', JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const body = document.getElementById('historyBody');
+      if (!body) return;
+      const history = getHistory();
+      body.innerHTML = '';
+
+      if (!history.length) {
+        body.innerHTML = '<tr><td colspan="5" class="small-muted">保存履歴はまだありません</td></tr>';
+        return;
+      }
+
+      history.forEach((data, index) => {
+        const subtotal = (data.items || []).reduce((sum, item) => sum + Number(item.qty || 0) * Number(item.price || 0), 0);
+        const discount = Math.min(Number(data.fields?.discount || 0), subtotal);
+        const taxRate = Number(data.fields?.taxRate || 0);
+        const tax = Math.round((subtotal - discount) * taxRate);
+        const total = subtotal - discount + tax;
+        const dt = data.savedAt ? new Date(data.savedAt).toLocaleString('ja-JP') : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(dt)}</td>
+          <td>${escapeHtml(data.fields?.projectName || '')}</td>
+          <td>${escapeHtml(data.fields?.clientName || '')}</td>
+          <td class="right">${yen(total)}</td>
+          <td>
+            <button class="light" type="button" onclick="loadHistory(${index})">復元</button>
+            <button class="danger" type="button" onclick="deleteHistory(${index})">削除</button>
+          </td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function exportJson() {
+      const data = collectData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      const no = (getValue('estimateNo') || 'estimate').replace(/[\\/:*?"<>|]/g, '-');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${no}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function importJsonFile(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          applyData(data);
+          localStorage.setItem('constructionEstimateData', JSON.stringify(data));
+          addHistory(data);
+          renderHistory();
+          alert('JSONから見積書を復元しました');
+        } catch (e) {
+          alert('JSONファイルを読み込めませんでした');
+        }
+      };
+      reader.readAsText(file);
+    }
+
     function saveData() {
-      const data = makeSnapshot();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      const data = collectData();
+      localStorage.setItem('constructionEstimateData', JSON.stringify(data));
+      addHistory(data);
       localStorage.setItem('constructionEstimateSealEnabled', String(sealEnabled));
-      addToHistory(data);
-      alert('保存しました。履歴にも追加しました');
+      alert('保存しました');
+      renderHistory();
     }
 
     function loadData() {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem('constructionEstimateData');
       if (!raw) return alert('保存データがありません');
-      try {
-        applySnapshot(JSON.parse(raw));
-      } catch {
-        alert('保存データの読込に失敗しました');
-      }
+      applyData(JSON.parse(raw));
+      alert('保存データを読み込みました');
     }
 
     function restoreHistory(index) {
@@ -1081,8 +1230,17 @@
       reader.readAsDataURL(file);
     });
 
+
+    document.getElementById('importJsonInput')?.addEventListener('change', (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      importJsonFile(file);
+      event.target.value = '';
+    });
+
     renderItems();
     renderSeal();
+    renderHistory();
     renderHistory();
   </script>
 </body>
