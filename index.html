@@ -361,7 +361,6 @@
       .preview table th, .preview table td { padding: 5px; }
       .preview tr { page-break-inside: avoid; page-break-after: auto; }
       .estimate-page { break-before: page; page-break-before: always; border-top: 0; margin-top: 0; padding-top: 0; }
-      .estimate-page:first-of-type { break-before: auto; page-break-before: auto; }
       .cover-label { font-size: 12px; margin: 10px 0 6px; }
       .page-heading span:first-child { font-size: 16px; }
       .note-box { font-size: 11px; min-height: 48px; margin-top: 10px; }
@@ -485,22 +484,22 @@
         <div class="toolbar">
           <button onclick="addItem()">＋ 項目追加</button>
 
-          <button class="light" onclick="addPreset('塗装工事','外壁塗装','高圧洗浄、下塗り、中塗り、上塗りを含む',1,'式',350000)">塗装</button>
-          <button class="light" onclick="addPreset('シーリング工事','シーリング打替','既存撤去、プライマー、新規打設、仕上げを含む',1,'式',180000)">シーリング</button>
-          <button class="light" onclick="addPreset('足場工事','仮設足場','足場架け払い、養生メッシュ、安全対策を含む',1,'式',220000)">足場</button>
-          <button class="light" onclick="addPreset('防水工事','屋上防水','下地調整、ウレタン防水、トップコート仕上げ',1,'式',280000)">防水</button>
-          <button class="light" onclick="addPreset('屋根工事','屋根補修','屋根材補修、板金調整、清掃を含む',1,'式',320000)">屋根</button>
-          <button class="light" onclick="addPreset('内装工事','クロス貼替','既存クロス撤去、下地調整、量産クロス貼り',50,'㎡',1800)">クロス</button>
-          <button class="light" onclick="addPreset('床工事','フロア施工','下地調整、フロア材施工、端部処理を含む',30,'㎡',4500)">床</button>
-          <button class="light" onclick="addPreset('解体工事','内装解体','既存内装材撤去、搬出、処分費込み',1,'式',250000)">解体</button>
-          <button class="light" onclick="addPreset('電気工事','照明交換','照明器具交換、配線接続、点灯確認',10,'箇所',12000)">電気</button>
-          <button class="light" onclick="addPreset('設備工事','給排水設備','配管調整、接続、漏水確認を含む',1,'式',180000)">設備</button>
-          <button class="light" onclick="addPreset('空調工事','エアコン設置','室内機・室外機設置、配管工事込み',2,'台',85000)">空調</button>
-          <button class="light" onclick="addPreset('外構工事','フェンス施工','基礎工事、フェンス設置、仕上げ込み',15,'m',22000)">外構</button>
-          <button class="light" onclick="addPreset('左官工事','モルタル補修','クラック補修、下地調整、仕上げ込み',1,'式',95000)">左官</button>
-          <button class="light" onclick="addPreset('大工工事','木下地工事','木材加工、下地組み、固定施工',1,'式',210000)">大工</button>
-          <button class="light" onclick="addPreset('清掃工事','竣工清掃','ガラス、床、共用部清掃込み',1,'式',55000)">清掃</button>
-          <button class="light" onclick="addPreset('付帯工事','諸経費','現場管理費、交通費、軽微な消耗品費を含む',1,'式',40000)">諸経費</button>
+          <button class="light" onclick="addPreset('塗装工事','外壁塗装','高圧洗浄、下塗り、中塗り、上塗りを含む',1,'式','')">塗装</button>
+          <button class="light" onclick="addPreset('シーリング工事','シーリング打替','既存撤去、プライマー、新規打設、仕上げを含む',1,'式','')">シーリング</button>
+          <button class="light" onclick="addPreset('足場工事','仮設足場','足場架け払い、養生メッシュ、安全対策を含む',1,'式','')">足場</button>
+          <button class="light" onclick="addPreset('防水工事','屋上防水','下地調整、ウレタン防水、トップコート仕上げ',1,'式','')">防水</button>
+          <button class="light" onclick="addPreset('屋根工事','屋根補修','屋根材補修、板金調整、清掃を含む',1,'式','')">屋根</button>
+          <button class="light" onclick="addPreset('内装工事','クロス貼替','既存クロス撤去、下地調整、量産クロス貼り',50,'㎡','')">クロス</button>
+          <button class="light" onclick="addPreset('床工事','フロア施工','下地調整、フロア材施工、端部処理を含む',30,'㎡','')">床</button>
+          <button class="light" onclick="addPreset('解体工事','内装解体','既存内装材撤去、搬出、処分費込み',1,'式','')">解体</button>
+          <button class="light" onclick="addPreset('電気工事','照明交換','照明器具交換、配線接続、点灯確認',10,'箇所','')">電気</button>
+          <button class="light" onclick="addPreset('設備工事','給排水設備','配管調整、接続、漏水確認を含む',1,'式','')">設備</button>
+          <button class="light" onclick="addPreset('空調工事','エアコン設置','室内機・室外機設置、配管工事込み',2,'台','')">空調</button>
+          <button class="light" onclick="addPreset('外構工事','フェンス施工','基礎工事、フェンス設置、仕上げ込み',15,'m','')">外構</button>
+          <button class="light" onclick="addPreset('左官工事','モルタル補修','クラック補修、下地調整、仕上げ込み',1,'式','')">左官</button>
+          <button class="light" onclick="addPreset('大工工事','木下地工事','木材加工、下地組み、固定施工',1,'式','')">大工</button>
+          <button class="light" onclick="addPreset('清掃工事','竣工清掃','ガラス、床、共用部清掃込み',1,'式','')">清掃</button>
+          <button class="light" onclick="addPreset('付帯工事','諸経費','現場管理費、交通費、軽微な消耗品費を含む',1,'式','')">諸経費</button>
         </div>
       </div>
 
@@ -619,10 +618,10 @@
     ];
 
     let items = [
-      { category: '塗装工事', name: '外壁塗装', detail: '高圧洗浄、下塗り、中塗り、上塗りを含む', qty: 1, unit: '式', price: 350000 },
-      { category: 'シーリング工事', name: 'シーリング打替', detail: '既存シーリング撤去、プライマー、新規打設、仕上げを含む', qty: 1, unit: '式', price: 180000 },
-      { category: '足場工事', name: '仮設足場', detail: '足場架け払い、養生メッシュ、安全対策を含む', qty: 1, unit: '式', price: 220000 },
-      { category: '付帯工事', name: '諸経費', detail: '現場管理費、交通費、軽微な消耗品費を含む', qty: 1, unit: '式', price: 40000 }
+      { category: '塗装工事', name: '外壁塗装', detail: '高圧洗浄、下塗り、中塗り、上塗りを含む', qty: 1, unit: '式', price: '' },
+      { category: 'シーリング工事', name: 'シーリング打替', detail: '既存シーリング撤去、プライマー、新規打設、仕上げを含む', qty: 1, unit: '式', price: '' },
+      { category: '足場工事', name: '仮設足場', detail: '足場架け払い、養生メッシュ、安全対策を含む', qty: 1, unit: '式', price: '' },
+      { category: '付帯工事', name: '諸経費', detail: '現場管理費、交通費、軽微な消耗品費を含む', qty: 1, unit: '式', price: '' }
     ];
 
     let sealImage = localStorage.getItem('constructionEstimateSeal') || '';
