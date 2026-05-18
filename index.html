@@ -667,6 +667,22 @@
       return row;
     }
 
+    function rowHasWorkContent(item = {}) {
+      return ['name', 'detail', 'remark', 'qty', 'unit', 'price'].some(key => String(item[key] ?? '').trim() !== '');
+    }
+
+    function isPureBlankRow(item = {}) {
+      return (item.rowType || 'item') === 'blank' && !item.category && !rowHasWorkContent(item);
+    }
+
+    function isPureCategoryRow(item = {}) {
+      return (item.rowType || 'item') === 'category' && item.category && !rowHasWorkContent(item);
+    }
+
+    function isAmountRow(item = {}) {
+      return !isPureBlankRow(item) && !isPureCategoryRow(item);
+    }
+
     let items = [];
 
     let sealImage = localStorage.getItem('constructionEstimateSeal') || '';
@@ -708,7 +724,7 @@
 
     function calc() {
       const subtotal = items.reduce((sum, item) => {
-        if (item.rowType === 'category' || item.rowType === 'blank') return sum;
+        if (!isAmountRow(item)) return sum;
         return sum + Number(item.qty || 0) * Number(item.price || 0);
       }, 0);
       const discount = Math.min(Number(document.getElementById('discount').value || 0), subtotal);
@@ -728,20 +744,33 @@
 
       items.forEach(item => {
         const rowType = item.rowType || 'item';
-        if (rowType === 'blank') return;
+        const hasContent = rowHasWorkContent(item);
+
+        if (isPureBlankRow(item)) {
+          if (currentCategory && groups.has(currentCategory)) {
+            groups.get(currentCategory).items.push({ ...item, category: currentCategory, rowType: 'blank' });
+          }
+          return;
+        }
 
         const category = (item.category || currentCategory || 'その他工事').trim() || 'その他工事';
         currentCategory = category;
 
         if (!groups.has(category)) groups.set(category, { total: 0, items: [] });
 
-        const amount = rowType === 'category' ? 0 : Number(item.qty || 0) * Number(item.price || 0);
+        if (isPureCategoryRow(item)) {
+          groups.get(category).items.push({ ...item, category, rowType: 'category' });
+          return;
+        }
+
+        const amount = Number(item.qty || 0) * Number(item.price || 0);
         groups.get(category).total += amount;
-        groups.get(category).items.push({ ...item, category, rowType });
+        groups.get(category).items.push({ ...item, category, rowType: hasContent ? 'item' : rowType });
       });
 
       return groups;
     }
+
 
 
     const workPresets = {
@@ -1274,7 +1303,7 @@
       let previousCategory = '';
 
       items.forEach((item, index) => {
-        const amount = (item.rowType === 'category' || item.rowType === 'blank') ? 0 : Number(item.qty || 0) * Number(item.price || 0);
+        const amount = isAmountRow(item) ? Number(item.qty || 0) * Number(item.price || 0) : 0;
 
         const rowType = item.rowType || 'item';
         const isBlank = rowType === 'blank';
@@ -1319,7 +1348,7 @@
             <input data-key="price" type="number" value="${escapeHtml(item.price || '')}" min="0" placeholder="0" />
           </td>
 
-          <td data-amount>${isBlank || isCategory ? '' : yen(amount)}</td>
+          <td data-amount>${isAmountRow(item) ? yen(amount) : ''}</td>
 
           <td>
             <button class="danger" type="button" onclick="removeItem(${index})">削除</button>
@@ -1331,6 +1360,11 @@
             const key = el.dataset.key;
             items[index][key] = el.value;
 
+            // 完全空行・工種行でも、数量や単価などを入れた瞬間に通常明細として扱う
+            if (key !== 'category' && rowHasWorkContent(items[index])) {
+              items[index].rowType = 'item';
+            }
+
             // 工種入力中に再描画すると、1文字打つたびにフォーカスが飛ぶため再描画しない
             if (key === 'category') {
               renderSummary();
@@ -1340,8 +1374,8 @@
             if (key === 'qty' || key === 'price') {
               const amountCell = tr.querySelector('[data-amount]');
               const current = items[index];
-              const rowAmount = (current.rowType === 'category' || current.rowType === 'blank') ? 0 : Number(current.qty || 0) * Number(current.price || 0);
-              amountCell.textContent = (current.rowType === 'category' || current.rowType === 'blank') ? '' : yen(rowAmount);
+              const rowAmount = isAmountRow(current) ? Number(current.qty || 0) * Number(current.price || 0) : 0;
+              amountCell.textContent = isAmountRow(current) ? yen(rowAmount) : '';
             }
 
             renderSummary();
@@ -1413,10 +1447,10 @@
             </thead>
             <tbody>
               ${group.items.map(item => {
-                if (item.rowType === 'category') {
+                if (isPureCategoryRow(item)) {
                   return `<tr><td colspan="7" style="font-weight:900;background:#f8fafc;">${escapeHtml(item.category)}</td></tr>`;
                 }
-                if (item.rowType === 'blank') {
+                if (isPureBlankRow(item)) {
                   return `<tr><td colspan="7" style="height:32px;">&nbsp;</td></tr>`;
                 }
                 const amount = Number(item.qty || 0) * Number(item.price || 0);
@@ -1428,7 +1462,7 @@
                     <td class="center">${escapeHtml(item.qty)}</td>
                     <td class="center">${escapeHtml(item.unit)}</td>
                     <td class="right">${item.price === '' ? '' : yen(item.price)}</td>
-                    <td class="right">${amount ? yen(amount) : ''}</td>
+                    <td class="right">${(item.qty !== '' || item.price !== '') ? yen(amount) : ''}</td>
                   </tr>
                 `;
               }).join('')}
@@ -1675,7 +1709,7 @@
 
       history.forEach((data, index) => {
         const subtotal = (data.items || []).reduce((sum, item) => {
-          if (item.rowType === 'category' || item.rowType === 'blank') return sum;
+          if (!isAmountRow(item)) return sum;
           return sum + Number(item.qty || 0) * Number(item.price || 0);
         }, 0);
         const discount = Math.min(Number(data.fields?.discount || 0), subtotal);
@@ -1774,7 +1808,7 @@
         const saved = data.savedAt ? new Date(data.savedAt).toLocaleString('ja-JP') : '日時不明';
         const title = `${escapeHtml(f.estimateNo || '見積番号なし')} / ${escapeHtml(f.clientName || 'お客様名なし')}`;
         const historyTotal = data.totals?.total ?? (data.items || []).reduce((sum, item) => {
-          if (item.rowType === 'category' || item.rowType === 'blank') return sum;
+          if (!isAmountRow(item)) return sum;
           return sum + Number(item.qty || 0) * Number(item.price || 0);
         }, 0);
         const meta = `${escapeHtml(f.projectName || '件名なし')}　${saved}　合計 ${yen(historyTotal)}`;
