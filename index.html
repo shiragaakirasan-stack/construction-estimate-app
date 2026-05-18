@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>工事見積書作成アプリ</title>
+  <title>工事見積書作成アプリ v2026-05-18-02</title>
   <style>
     :root {
       --bg: #f4f6f8;
@@ -454,7 +454,7 @@
 <body>
   <header class="no-print">
     <h1>工事見積書作成アプリ</h1>
-    <p>入力画面と見積書プレビュー画面を分離。印刷・PDF保存・データ保存まで対応。</p>
+    <p>入力画面と見積書プレビュー画面を分離。工種追加・工程別明細対応版 v2026-05-18-02</p>
   </header>
 
   <main>
@@ -486,8 +486,6 @@
           <button class="light" onclick="document.getElementById('importJsonInput').click()">JSON読込</button>
           <input id="importJsonInput" type="file" accept="application/json,.json" style="display:none" />
         </div>
-        <p class="small-muted">工程ボタンを押すと、その工程だけで1行追加されます。工事詳細は自動でまとめ入力しません。</p>
-
         <div class="table-wrap">
           <table>
             <thead>
@@ -556,30 +554,15 @@
         <div class="category-tools">
           <div>
             <label>現在の工種（大枠）</label>
-            <select id="activeCategory">
-              <option value="調査">調査</option>
-              <option value="塗装工事">塗装工事</option>
-              <option value="タイル工事">タイル工事</option>
-              <option value="防水工事">防水工事</option>
-              <option value="シーリング工事">シーリング工事</option>
-              <option value="足場工事">足場工事</option>
-              <option value="屋根工事">屋根工事</option>
-              <option value="内装工事">内装工事</option>
-              <option value="床工事">床工事</option>
-              <option value="左官工事">左官工事</option>
-              <option value="大工工事">大工工事</option>
-              <option value="設備工事">設備工事</option>
-              <option value="電気工事">電気工事</option>
-              <option value="空調工事">空調工事</option>
-              <option value="外構工事">外構工事</option>
-              <option value="解体工事">解体工事</option>
-              <option value="清掃工事">清掃工事</option>
-              <option value="付帯工事">付帯工事</option>
-              <option value="その他工事">その他工事</option>
-            </select>
+            <select id="activeCategory"></select>
+            <div class="toolbar" style="margin-top:8px; gap:6px;">
+              <input id="newCategoryName" placeholder="新しい工種名を入力 例：仮設工事" style="max-width:260px;" />
+              <button class="light" type="button" onclick="addCustomCategory()">工種を追加</button>
+            </div>
+            <p class="small-muted">ここで追加した工種は、このブラウザ内に保存されます。</p>
           </div>
           <div>
-            <label>この工種に工程を追加（1ボタン＝1明細行）</label>
+            <label>この工種に作業内容を追加</label>
             <div class="work-preset-panel" id="workPresetPanel"></div>
           </div>
         </div>
@@ -596,7 +579,7 @@
               <tr>
                 <th>工種</th>
                 <th>工事項目</th>
-                <th>工事詳細（必要時だけ手入力）</th>
+                <th>工事詳細</th>
                 <th>備考</th>
                 <th>数量</th>
                 <th>単位</th>
@@ -667,6 +650,7 @@
 
     const STORAGE_KEY = 'constructionEstimateData';
     const HISTORY_KEY = 'constructionEstimateHistory';
+    const CUSTOM_CATEGORY_KEY = 'constructionEstimateCustomCategories';
     const HISTORY_LIMIT = 10;
 
     function blankItem(rowType = 'item') {
@@ -762,234 +746,448 @@
 
     const workPresets = {
       "調査": {
-        "現地調査": { detail: "", unit: "式", price: 0 },
-        "数量調査": { detail: "", unit: "式", price: 0 },
-        "劣化調査": { detail: "", unit: "式", price: 0 },
-        "打診調査": { detail: "", unit: "㎡", price: 0 },
-        "目視調査": { detail: "", unit: "式", price: 0 },
-        "漏水調査": { detail: "", unit: "式", price: 0 },
-        "写真撮影": { detail: "", unit: "式", price: 0 },
-        "報告書作成": { detail: "", unit: "式", price: 0 }
+            "現地調査": { "detail": "", "unit": "式", "price": 0 },
+            "数量調査": { "detail": "", "unit": "式", "price": 0 },
+            "打診調査": { "detail": "", "unit": "㎡", "price": 0 },
+            "漏水調査": { "detail": "", "unit": "式", "price": 0 },
+            "写真撮影・報告書作成": { "detail": "", "unit": "式", "price": 0 }
       },
       "塗装工事": {
-        "高圧洗浄": { detail: "", unit: "㎡", price: 0 },
-        "養生": { detail: "", unit: "式", price: 0 },
-        "飛散防止養生": { detail: "", unit: "式", price: 0 },
-        "下地調査": { detail: "", unit: "式", price: 0 },
-        "クラック補修": { detail: "", unit: "m", price: 0 },
-        "欠損補修": { detail: "", unit: "箇所", price: 0 },
-        "爆裂補修": { detail: "", unit: "箇所", price: 0 },
-        "ケレン清掃": { detail: "", unit: "㎡", price: 0 },
-        "シーラー下塗り": { detail: "", unit: "㎡", price: 0 },
-        "微弾性フィラー下塗り": { detail: "", unit: "㎡", price: 0 },
-        "外壁中塗り": { detail: "", unit: "㎡", price: 0 },
-        "外壁上塗り": { detail: "", unit: "㎡", price: 0 },
-        "屋根下塗り": { detail: "", unit: "㎡", price: 0 },
-        "屋根中塗り": { detail: "", unit: "㎡", price: 0 },
-        "屋根上塗り": { detail: "", unit: "㎡", price: 0 },
-        "タスペーサー取付": { detail: "", unit: "㎡", price: 0 },
-        "鉄部ケレン": { detail: "", unit: "㎡", price: 0 },
-        "鉄部錆止め": { detail: "", unit: "㎡", price: 0 },
-        "鉄部中塗り": { detail: "", unit: "㎡", price: 0 },
-        "鉄部上塗り": { detail: "", unit: "㎡", price: 0 },
-        "軒天下塗り": { detail: "", unit: "㎡", price: 0 },
-        "軒天上塗り": { detail: "", unit: "㎡", price: 0 },
-        "雨樋ケレン": { detail: "", unit: "m", price: 0 },
-        "雨樋塗装": { detail: "", unit: "m", price: 0 },
-        "破風板ケレン": { detail: "", unit: "m", price: 0 },
-        "破風板塗装": { detail: "", unit: "m", price: 0 },
-        "付帯部塗装": { detail: "", unit: "式", price: 0 },
-        "清掃": { detail: "", unit: "式", price: 0 },
-        "タッチアップ": { detail: "", unit: "式", price: 0 }
+            "外壁塗装": {
+                  "detail": "高圧洗浄\nクラック補修\n微弾性フィラー塗布\n下塗り（シーラー）\n中塗り\n上塗り\nタッチアップ\n清掃",
+                  "unit": "㎡",
+                  "price": 3200
+            },
+            "鉄部塗装": {
+                  "detail": "3種ケレン\n清掃\n錆止め塗装\n中塗り\n上塗り",
+                  "unit": "㎡",
+                  "price": 2800
+            },
+            "屋根塗装": {
+                  "detail": "高圧洗浄\nタスペーサー取付\n下塗り\n中塗り\n上塗り\n縁切り確認",
+                  "unit": "㎡",
+                  "price": 3500
+            },
+            "軒天塗装": {
+                  "detail": "清掃\n下地処理\n下塗り\n上塗り",
+                  "unit": "㎡",
+                  "price": 2200
+            },
+            "雨樋塗装": {
+                  "detail": "ケレン清掃\n下塗り\n上塗り",
+                  "unit": "m",
+                  "price": 900
+            },
+            "破風板塗装": {
+                  "detail": "ケレン清掃\n下塗り\n中塗り\n上塗り",
+                  "unit": "m",
+                  "price": 1200
+            },
+            "付帯部塗装": {
+                  "detail": "ケレン清掃\n下地処理\n下塗り\n上塗り",
+                  "unit": "式",
+                  "price": 0
+            },
+            "養生": {
+                  "detail": "サッシ・土間・植栽・付帯物養生\n飛散防止対策",
+                  "unit": "式",
+                  "price": 0
+            }
       },
       "タイル工事": {
-        "打診調査": { detail: "", unit: "㎡", price: 0 },
-        "マーキング": { detail: "", unit: "式", price: 0 },
-        "タイル斫り撤去": { detail: "", unit: "㎡", price: 0 },
-        "下地補修": { detail: "", unit: "㎡", price: 0 },
-        "タイル張替": { detail: "", unit: "㎡", price: 0 },
-        "目地詰め": { detail: "", unit: "㎡", price: 0 },
-        "穿孔": { detail: "", unit: "穴", price: 0 },
-        "エポキシ樹脂注入": { detail: "", unit: "穴", price: 0 },
-        "ステンレスピン挿入": { detail: "", unit: "本", price: 0 },
-        "孔埋め": { detail: "", unit: "穴", price: 0 },
-        "薬品洗浄": { detail: "", unit: "㎡", price: 0 },
-        "エフロ除去": { detail: "", unit: "㎡", price: 0 },
-        "タイル清掃": { detail: "", unit: "式", price: 0 }
+            "タイル補修": {
+                  "detail": "打診調査\nマーキング\nタイル斫り撤去\n下地補修\nタイル張替\n目地処理\n清掃",
+                  "unit": "㎡",
+                  "price": 8500
+            },
+            "タイル浮き注入補修": {
+                  "detail": "打診調査\n穿孔\nエポキシ樹脂注入\nステンレスピン挿入\n孔埋め\n清掃",
+                  "unit": "穴",
+                  "price": 750
+            },
+            "タイル張替": {
+                  "detail": "既存タイル撤去\n下地調整\nタイル張り\n目地詰め\n清掃",
+                  "unit": "㎡",
+                  "price": 12000
+            },
+            "タイル洗浄": {
+                  "detail": "高圧洗浄\n薬品洗浄\nエフロ除去\n水洗い\n清掃",
+                  "unit": "㎡",
+                  "price": 1800
+            }
       },
       "防水工事": {
-        "高圧洗浄": { detail: "", unit: "㎡", price: 0 },
-        "下地処理": { detail: "", unit: "㎡", price: 0 },
-        "脆弱部撤去": { detail: "", unit: "㎡", price: 0 },
-        "不陸調整": { detail: "", unit: "㎡", price: 0 },
-        "カチオン補修": { detail: "", unit: "㎡", price: 0 },
-        "プライマー塗布": { detail: "", unit: "㎡", price: 0 },
-        "通気緩衝シート貼り": { detail: "", unit: "㎡", price: 0 },
-        "脱気筒取付": { detail: "", unit: "箇所", price: 0 },
-        "ウレタン防水 1層目": { detail: "", unit: "㎡", price: 0 },
-        "ウレタン防水 2層目": { detail: "", unit: "㎡", price: 0 },
-        "トップコート": { detail: "", unit: "㎡", price: 0 },
-        "FRPマット敷込み": { detail: "", unit: "㎡", price: 0 },
-        "樹脂塗布": { detail: "", unit: "㎡", price: 0 },
-        "脱泡処理": { detail: "", unit: "㎡", price: 0 },
-        "塩ビシート貼り": { detail: "", unit: "㎡", price: 0 },
-        "端末シール処理": { detail: "", unit: "m", price: 0 }
+            "ウレタン防水 密着工法": {
+                  "detail": "高圧洗浄\n下地処理\nカチオン補修\nプライマー塗布\nウレタン1層目\nウレタン2層目\nトップコート",
+                  "unit": "㎡",
+                  "price": 6500
+            },
+            "ウレタン防水 通気緩衝工法": {
+                  "detail": "高圧洗浄\n下地処理\nプライマー塗布\n通気緩衝シート貼り\n脱気筒取付\nウレタン1層目\nウレタン2層目\nトップコート",
+                  "unit": "㎡",
+                  "price": 8500
+            },
+            "FRP防水": {
+                  "detail": "研磨清掃\nプライマー塗布\nガラスマット敷込み\n樹脂塗布\nトップコート",
+                  "unit": "㎡",
+                  "price": 9000
+            },
+            "シート防水": {
+                  "detail": "下地清掃\n絶縁シート敷設\n塩ビシート貼り\n端末処理\n脱気筒取付\n清掃",
+                  "unit": "㎡",
+                  "price": 7800
+            }
       },
       "シーリング工事": {
-        "シーリング調査": { detail: "", unit: "式", price: 0 },
-        "数量調査": { detail: "", unit: "m", price: 0 },
-        "既存シーリング撤去": { detail: "", unit: "m", price: 0 },
-        "撤去材回収": { detail: "", unit: "式", price: 0 },
-        "目地清掃": { detail: "", unit: "m", price: 0 },
-        "養生テープ貼り": { detail: "", unit: "m", price: 0 },
-        "ボンドブレーカー設置": { detail: "", unit: "m", price: 0 },
-        "バックアップ材充填": { detail: "", unit: "m", price: 0 },
-        "プライマー塗布": { detail: "", unit: "m", price: 0 },
-        "シーリング材充填": { detail: "", unit: "m", price: 0 },
-        "ヘラ押さえ": { detail: "", unit: "m", price: 0 },
-        "養生撤去": { detail: "", unit: "m", price: 0 },
-        "端末処理": { detail: "", unit: "m", price: 0 },
-        "清掃": { detail: "", unit: "式", price: 0 },
-        "シーリング増し打ち": { detail: "", unit: "m", price: 0 }
+            "既存シーリング撤去": { "detail": "", "unit": "m", "price": 0 },
+            "撤去材集積・処分": { "detail": "", "unit": "式", "price": 0 },
+            "目地清掃": { "detail": "", "unit": "m", "price": 0 },
+            "養生テープ貼り": { "detail": "", "unit": "m", "price": 0 },
+            "ボンドブレーカー設置": { "detail": "", "unit": "m", "price": 0 },
+            "バックアップ材設置": { "detail": "", "unit": "m", "price": 0 },
+            "プライマー塗布": { "detail": "", "unit": "m", "price": 0 },
+            "シーリング材充填": { "detail": "", "unit": "m", "price": 0 },
+            "ヘラ押さえ": { "detail": "", "unit": "m", "price": 0 },
+            "養生テープ撤去": { "detail": "", "unit": "m", "price": 0 },
+            "端末処理": { "detail": "", "unit": "箇所", "price": 0 },
+            "打替仕上げ確認": { "detail": "", "unit": "式", "price": 0 },
+            "増し打ち清掃": { "detail": "", "unit": "m", "price": 0 },
+            "増し打ちプライマー塗布": { "detail": "", "unit": "m", "price": 0 },
+            "増し打ちシーリング材充填": { "detail": "", "unit": "m", "price": 0 },
+            "増し打ちヘラ押さえ": { "detail": "", "unit": "m", "price": 0 },
+            "施工後清掃": { "detail": "", "unit": "式", "price": 0 }
+      },
+      "仮設工事": {
+            "仮設計画": { "detail": "", "unit": "式", "price": 0 },
+            "現場養生": { "detail": "", "unit": "式", "price": 0 },
+            "仮設資材搬入": { "detail": "", "unit": "式", "price": 0 },
+            "仮設資材搬出": { "detail": "", "unit": "式", "price": 0 },
+            "仮設通路設置": { "detail": "", "unit": "m", "price": 0 },
+            "仮囲い設置": { "detail": "", "unit": "m", "price": 0 },
+            "安全掲示物設置": { "detail": "", "unit": "式", "price": 0 },
+            "親綱設置": { "detail": "", "unit": "m", "price": 0 },
+            "安全帯使用設備設置": { "detail": "", "unit": "式", "price": 0 },
+            "ロープアクセス": { "detail": "", "unit": "人工", "price": 0 },
+            "飛散防止ネット設置": { "detail": "", "unit": "㎡", "price": 0 },
+            "飛散防止ネット撤去": { "detail": "", "unit": "㎡", "price": 0 },
+            "仮設照明設置": { "detail": "", "unit": "箇所", "price": 0 },
+            "仮設電源設置": { "detail": "", "unit": "式", "price": 0 },
+            "仮設水道設置": { "detail": "", "unit": "式", "price": 0 },
+            "仮設トイレ設置": { "detail": "", "unit": "台", "price": 0 },
+            "資材置場設置": { "detail": "", "unit": "式", "price": 0 },
+            "第三者養生": { "detail": "", "unit": "式", "price": 0 },
+            "清掃・片付け": { "detail": "", "unit": "式", "price": 0 }
       },
       "足場工事": {
-        "足場組立": { detail: "", unit: "㎡", price: 0 },
-        "メッシュシート設置": { detail: "", unit: "㎡", price: 0 },
-        "昇降設備設置": { detail: "", unit: "箇所", price: 0 },
-        "足場点検": { detail: "", unit: "式", price: 0 },
-        "足場解体": { detail: "", unit: "㎡", price: 0 },
-        "仮設材運搬": { detail: "", unit: "式", price: 0 }
+            "仮設足場": {
+                  "detail": "足場組立\n作業床設置\n安全手摺設置\n点検",
+                  "unit": "㎡",
+                  "price": 900
+            },
+            "メッシュシート": {
+                  "detail": "飛散防止メッシュシート設置\n結束確認\n撤去",
+                  "unit": "㎡",
+                  "price": 250
+            },
+            "昇降設備": {
+                  "detail": "昇降階段設置\n安全確認\n撤去",
+                  "unit": "式",
+                  "price": 0
+            },
+            "足場解体": {
+                  "detail": "足場解体\n積込\n搬出\n清掃",
+                  "unit": "式",
+                  "price": 0
+            }
       },
       "屋根工事": {
-        "既存屋根材撤去": { detail: "", unit: "㎡", price: 0 },
-        "野地板補修": { detail: "", unit: "㎡", price: 0 },
-        "防水シート敷設": { detail: "", unit: "㎡", price: 0 },
-        "屋根材施工": { detail: "", unit: "㎡", price: 0 },
-        "棟板金撤去": { detail: "", unit: "m", price: 0 },
-        "貫板交換": { detail: "", unit: "m", price: 0 },
-        "棟板金取付": { detail: "", unit: "m", price: 0 },
-        "漆喰撤去": { detail: "", unit: "m", price: 0 },
-        "漆喰詰め直し": { detail: "", unit: "m", price: 0 },
-        "屋根清掃": { detail: "", unit: "式", price: 0 }
+            "屋根葺き替え": {
+                  "detail": "既存屋根材撤去\n野地板補修\n防水シート敷設\n屋根材施工\n棟板金施工\n清掃",
+                  "unit": "㎡",
+                  "price": 15000
+            },
+            "屋根カバー工法": {
+                  "detail": "既存屋根確認\nルーフィング敷設\n屋根材重ね葺き\n棟板金施工\n清掃",
+                  "unit": "㎡",
+                  "price": 11000
+            },
+            "棟板金交換": {
+                  "detail": "既存棟板金撤去\n貫板交換\n新規棟板金取付\nシーリング処理",
+                  "unit": "m",
+                  "price": 6500
+            },
+            "漆喰補修": {
+                  "detail": "既存漆喰撤去\n清掃\n漆喰詰め直し\n仕上げ",
+                  "unit": "m",
+                  "price": 3500
+            }
       },
       "内装工事": {
-        "既存クロス撤去": { detail: "", unit: "㎡", price: 0 },
-        "下地パテ処理": { detail: "", unit: "㎡", price: 0 },
-        "研磨": { detail: "", unit: "㎡", price: 0 },
-        "クロス貼り": { detail: "", unit: "㎡", price: 0 },
-        "ボード撤去": { detail: "", unit: "㎡", price: 0 },
-        "石膏ボード貼り": { detail: "", unit: "㎡", price: 0 },
-        "軽天下地組み": { detail: "", unit: "㎡", price: 0 },
-        "建具撤去": { detail: "", unit: "箇所", price: 0 },
-        "建具取付": { detail: "", unit: "箇所", price: 0 },
-        "内装清掃": { detail: "", unit: "式", price: 0 }
+            "クロス貼替": {
+                  "detail": "既存クロス撤去\n下地パテ処理\nクロス貼り\nジョイント処理\n清掃",
+                  "unit": "㎡",
+                  "price": 1600
+            },
+            "ボード補修": {
+                  "detail": "破損部撤去\n下地確認\n石膏ボード貼り\nビス留め\nパテ処理",
+                  "unit": "㎡",
+                  "price": 4500
+            },
+            "軽天工事": {
+                  "detail": "墨出し\nLGS組立\n開口補強\nボード貼り",
+                  "unit": "㎡",
+                  "price": 6500
+            },
+            "建具工事": {
+                  "detail": "既存建具撤去\n新規建具取付\n建付調整\n金物調整",
+                  "unit": "箇所",
+                  "price": 0
+            }
       },
       "床工事": {
-        "既存床撤去": { detail: "", unit: "㎡", price: 0 },
-        "床下地調整": { detail: "", unit: "㎡", price: 0 },
-        "接着剤塗布": { detail: "", unit: "㎡", price: 0 },
-        "フロアタイル貼り": { detail: "", unit: "㎡", price: 0 },
-        "長尺シート貼り": { detail: "", unit: "㎡", price: 0 },
-        "溶接処理": { detail: "", unit: "m", price: 0 },
-        "CF貼り": { detail: "", unit: "㎡", price: 0 },
-        "ソフト巾木取付": { detail: "", unit: "m", price: 0 },
-        "床清掃": { detail: "", unit: "式", price: 0 }
+            "フロアタイル施工": {
+                  "detail": "既存床撤去\n下地調整\n接着剤塗布\nフロアタイル貼り\n清掃",
+                  "unit": "㎡",
+                  "price": 5500
+            },
+            "長尺シート施工": {
+                  "detail": "下地補修\n接着剤塗布\n長尺シート貼り\n溶接処理\n端部処理",
+                  "unit": "㎡",
+                  "price": 6200
+            },
+            "CF施工": {
+                  "detail": "既存床撤去\n下地調整\nCF貼り\nソフト巾木取付\n清掃",
+                  "unit": "㎡",
+                  "price": 3800
+            },
+            "下地調整": {
+                  "detail": "不陸調整\nパテ処理\n研磨清掃",
+                  "unit": "㎡",
+                  "price": 1200
+            }
       },
       "左官工事": {
-        "脆弱部撤去": { detail: "", unit: "㎡", price: 0 },
-        "清掃": { detail: "", unit: "式", price: 0 },
-        "プライマー塗布": { detail: "", unit: "㎡", price: 0 },
-        "モルタル充填": { detail: "", unit: "㎡", price: 0 },
-        "金鏝仕上げ": { detail: "", unit: "㎡", price: 0 },
-        "カチオン塗布": { detail: "", unit: "㎡", price: 0 },
-        "鉄筋ケレン": { detail: "", unit: "箇所", price: 0 },
-        "防錆処理": { detail: "", unit: "箇所", price: 0 },
-        "樹脂モルタル成形": { detail: "", unit: "箇所", price: 0 }
+            "モルタル補修": {
+                  "detail": "脆弱部撤去\n清掃\nプライマー塗布\nモルタル充填\n金鏝仕上げ",
+                  "unit": "㎡",
+                  "price": 6500
+            },
+            "カチオン補修": {
+                  "detail": "下地清掃\nカチオン塗布\n不陸調整\n仕上げ",
+                  "unit": "㎡",
+                  "price": 3200
+            },
+            "爆裂補修": {
+                  "detail": "脆弱部斫り\n鉄筋ケレン\n防錆処理\n樹脂モルタル充填\n成形仕上げ",
+                  "unit": "箇所",
+                  "price": 0
+            }
       },
       "大工工事": {
-        "墨出し": { detail: "", unit: "式", price: 0 },
-        "木下地組み": { detail: "", unit: "㎡", price: 0 },
-        "合板貼り": { detail: "", unit: "㎡", price: 0 },
-        "造作材加工": { detail: "", unit: "式", price: 0 },
-        "造作取付": { detail: "", unit: "式", price: 0 },
-        "枠加工": { detail: "", unit: "箇所", price: 0 },
-        "枠取付": { detail: "", unit: "箇所", price: 0 }
+            "木下地工事": {
+                  "detail": "墨出し\n木下地組み\n合板貼り\nビス留め\n確認",
+                  "unit": "㎡",
+                  "price": 6500
+            },
+            "造作工事": {
+                  "detail": "材料加工\n造作取付\n固定\n調整\n仕上げ",
+                  "unit": "式",
+                  "price": 0
+            },
+            "枠取付": {
+                  "detail": "既存確認\n枠加工\n取付\n隙間調整\n固定",
+                  "unit": "箇所",
+                  "price": 0
+            }
       },
       "設備工事": {
-        "既存配管確認": { detail: "", unit: "式", price: 0 },
-        "配管更新": { detail: "", unit: "式", price: 0 },
-        "給水接続": { detail: "", unit: "箇所", price: 0 },
-        "排水接続": { detail: "", unit: "箇所", price: 0 },
-        "通水確認": { detail: "", unit: "式", price: 0 },
-        "漏水確認": { detail: "", unit: "式", price: 0 },
-        "既存便器撤去": { detail: "", unit: "台", price: 0 },
-        "新規便器取付": { detail: "", unit: "台", price: 0 },
-        "水栓交換": { detail: "", unit: "箇所", price: 0 }
+            "給排水配管": {
+                  "detail": "既存配管確認\n配管更新\n接続工事\n通水確認\n漏水確認",
+                  "unit": "式",
+                  "price": 0
+            },
+            "トイレ交換": {
+                  "detail": "既存便器撤去\n排水芯確認\n新規便器取付\n給水接続\n試運転",
+                  "unit": "台",
+                  "price": 0
+            },
+            "洗面台交換": {
+                  "detail": "既存洗面台撤去\n給排水接続\n新規洗面台取付\n漏水確認",
+                  "unit": "台",
+                  "price": 0
+            },
+            "水栓交換": {
+                  "detail": "既存水栓撤去\n新規水栓取付\n通水確認\n漏水確認",
+                  "unit": "箇所",
+                  "price": 0
+            }
       },
       "電気工事": {
-        "既存照明撤去": { detail: "", unit: "箇所", price: 0 },
-        "新規照明取付": { detail: "", unit: "箇所", price: 0 },
-        "配線敷設": { detail: "", unit: "式", price: 0 },
-        "結線": { detail: "", unit: "式", price: 0 },
-        "導通確認": { detail: "", unit: "式", price: 0 },
-        "コンセント増設": { detail: "", unit: "箇所", price: 0 },
-        "スイッチ交換": { detail: "", unit: "箇所", price: 0 },
-        "通電確認": { detail: "", unit: "式", price: 0 }
+            "照明交換": {
+                  "detail": "既存照明撤去\n配線確認\n新規照明取付\n点灯確認",
+                  "unit": "箇所",
+                  "price": 0
+            },
+            "配線工事": {
+                  "detail": "配線ルート確認\n配線敷設\n結線\n導通確認",
+                  "unit": "式",
+                  "price": 0
+            },
+            "コンセント増設": {
+                  "detail": "取付位置確認\n配線工事\nコンセント取付\n通電確認",
+                  "unit": "箇所",
+                  "price": 0
+            },
+            "スイッチ交換": {
+                  "detail": "既存スイッチ撤去\n新規スイッチ取付\n動作確認",
+                  "unit": "箇所",
+                  "price": 0
+            }
       },
       "空調工事": {
-        "既存機器撤去": { detail: "", unit: "台", price: 0 },
-        "室内機取付": { detail: "", unit: "台", price: 0 },
-        "室外機設置": { detail: "", unit: "台", price: 0 },
-        "冷媒配管接続": { detail: "", unit: "式", price: 0 },
-        "真空引き": { detail: "", unit: "台", price: 0 },
-        "試運転": { detail: "", unit: "台", price: 0 },
-        "ダクト接続": { detail: "", unit: "式", price: 0 },
-        "保温施工": { detail: "", unit: "式", price: 0 }
+            "エアコン交換": {
+                  "detail": "既存機器撤去\n新規室内機取付\n室外機設置\n冷媒配管接続\n真空引き\n試運転",
+                  "unit": "台",
+                  "price": 0
+            },
+            "ダクト工事": {
+                  "detail": "既存確認\nダクト接続\n吊り込み\n保温施工\n風量確認",
+                  "unit": "式",
+                  "price": 0
+            },
+            "冷媒配管": {
+                  "detail": "配管ルート確認\n冷媒配管施工\n保温巻き\n接続\n気密確認",
+                  "unit": "m",
+                  "price": 0
+            }
       },
       "外構工事": {
-        "掘削": { detail: "", unit: "㎡", price: 0 },
-        "砕石敷き": { detail: "", unit: "㎡", price: 0 },
-        "転圧": { detail: "", unit: "㎡", price: 0 },
-        "ワイヤーメッシュ敷設": { detail: "", unit: "㎡", price: 0 },
-        "コンクリート打設": { detail: "", unit: "㎡", price: 0 },
-        "金鏝仕上げ": { detail: "", unit: "㎡", price: 0 },
-        "フェンス柱設置": { detail: "", unit: "本", price: 0 },
-        "フェンス本体取付": { detail: "", unit: "m", price: 0 },
-        "ブロック積み": { detail: "", unit: "㎡", price: 0 }
+            "土間コンクリート": {
+                  "detail": "掘削\n砕石敷き\n転圧\nワイヤーメッシュ敷設\nコンクリート打設\n金鏝仕上げ",
+                  "unit": "㎡",
+                  "price": 9500
+            },
+            "フェンス工事": {
+                  "detail": "柱位置出し\n基礎穴掘削\n柱設置\nフェンス本体取付\n調整",
+                  "unit": "m",
+                  "price": 0
+            },
+            "ブロック工事": {
+                  "detail": "基礎施工\nブロック積み\n鉄筋挿入\n目地仕上げ",
+                  "unit": "㎡",
+                  "price": 0
+            }
       },
       "解体工事": {
-        "養生": { detail: "", unit: "式", price: 0 },
-        "内装解体": { detail: "", unit: "㎡", price: 0 },
-        "斫り工事": { detail: "", unit: "㎡", price: 0 },
-        "分別": { detail: "", unit: "式", price: 0 },
-        "廃材搬出": { detail: "", unit: "式", price: 0 },
-        "産廃処分": { detail: "", unit: "式", price: 0 },
-        "解体後清掃": { detail: "", unit: "式", price: 0 }
+            "内装解体": {
+                  "detail": "養生\n既存内装解体\n分別\n搬出\n産廃処分\n清掃",
+                  "unit": "㎡",
+                  "price": 3500
+            },
+            "斫り工事": {
+                  "detail": "施工範囲確認\nコンクリート斫り\nガラ搬出\n清掃",
+                  "unit": "㎡",
+                  "price": 0
+            },
+            "廃材搬出": {
+                  "detail": "分別\n積込\n搬出\n処分",
+                  "unit": "式",
+                  "price": 0
+            }
       },
       "清掃工事": {
-        "美装清掃": { detail: "", unit: "式", price: 0 },
-        "床清掃": { detail: "", unit: "㎡", price: 0 },
-        "建具清掃": { detail: "", unit: "箇所", price: 0 },
-        "水回り清掃": { detail: "", unit: "箇所", price: 0 },
-        "ガラス清掃": { detail: "", unit: "㎡", price: 0 },
-        "サッシ清掃": { detail: "", unit: "箇所", price: 0 },
-        "高圧洗浄": { detail: "", unit: "㎡", price: 0 },
-        "拭き上げ": { detail: "", unit: "式", price: 0 }
+            "美装清掃": {
+                  "detail": "床清掃\n建具清掃\n水回り清掃\n拭き上げ\n確認",
+                  "unit": "式",
+                  "price": 0
+            },
+            "ガラス清掃": {
+                  "detail": "ガラス面洗浄\nサッシ清掃\n水切り\n拭き上げ",
+                  "unit": "㎡",
+                  "price": 500
+            },
+            "高圧洗浄": {
+                  "detail": "洗浄範囲確認\n高圧洗浄\n汚水処理\n清掃",
+                  "unit": "㎡",
+                  "price": 350
+            }
       },
       "付帯工事": {
-        "現場管理費": { detail: "", unit: "式", price: 0 },
-        "諸経費": { detail: "", unit: "式", price: 0 },
-        "運搬費": { detail: "", unit: "式", price: 0 },
-        "消耗品費": { detail: "", unit: "式", price: 0 },
-        "駐車場代": { detail: "", unit: "式", price: 0 },
-        "残材処分": { detail: "", unit: "式", price: 0 }
+            "現場管理費": {
+                  "detail": "現場管理\n工程調整\n安全管理\n各種手配",
+                  "unit": "式",
+                  "price": 0
+            },
+            "諸経費": {
+                  "detail": "運搬費\n消耗品費\n通信費\n事務経費",
+                  "unit": "式",
+                  "price": 0
+            },
+            "駐車場代": {
+                  "detail": "施工期間中駐車場代",
+                  "unit": "式",
+                  "price": 0
+            }
       },
       "その他工事": {
-        "作業一式": { detail: "", unit: "式", price: 0 },
-        "材料費": { detail: "", unit: "式", price: 0 },
-        "追加工事": { detail: "", unit: "式", price: 0 }
+            "作業一式": {
+                  "detail": "現地確認のうえ施工\n必要箇所調整\n清掃",
+                  "unit": "式",
+                  "price": 0
+            }
       }
-    };
+};
+
+    const defaultWorkPresets = JSON.parse(JSON.stringify(workPresets));
+
+    function getCustomCategories() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(CUSTOM_CATEGORY_KEY) || '[]');
+        return Array.isArray(saved) ? saved.filter(Boolean) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function setCustomCategories(categories) {
+      const unique = Array.from(new Set(categories.map(v => String(v || '').trim()).filter(Boolean)));
+      localStorage.setItem(CUSTOM_CATEGORY_KEY, JSON.stringify(unique));
+    }
+
+    function getAllCategories() {
+      return Array.from(new Set([...Object.keys(workPresets), ...getCustomCategories(), 'その他工事']));
+    }
+
+    function renderCategorySelect(keepValue = '') {
+      const select = document.getElementById('activeCategory');
+      if (!select) return;
+      const current = keepValue || select.value || '塗装工事';
+      const categories = getAllCategories();
+      select.innerHTML = categories.map(category =>
+        `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`
+      ).join('');
+      select.value = categories.includes(current) ? current : categories[0] || 'その他工事';
+    }
+
+    function addCustomCategory() {
+      const input = document.getElementById('newCategoryName');
+      const name = String(input?.value || '').trim();
+      if (!name) {
+        alert('追加する工種名を入力してください');
+        return;
+      }
+
+      const categories = getCustomCategories();
+      if (!workPresets[name]) workPresets[name] = {};
+      if (!categories.includes(name) && !Object.prototype.hasOwnProperty.call(defaultWorkPresets, name)) {
+        categories.push(name);
+        setCustomCategories(categories);
+      }
+
+      renderCategorySelect(name);
+      renderWorkPresets();
+      if (input) input.value = '';
+    }
 
     function getActiveCategory() {
       return document.getElementById('activeCategory')?.value || 'その他工事';
@@ -1004,9 +1202,10 @@
       if (!panel) return;
       const category = getActiveCategory();
       const presets = workPresets[category] || {};
-      panel.innerHTML = Object.keys(presets).map(name =>
+      const presetButtons = Object.keys(presets).map(name =>
         `<button class="light" type="button" onclick="addWorkItem('${escapeJs(category)}','${escapeJs(name)}')">${escapeHtml(name)}</button>`
       ).join('');
+      panel.innerHTML = presetButtons || '<span class="small-muted">この工種には登録済み工程がありません。下の「手入力の作業内容追加」を使ってください。</span>';
     }
 
     function addWorkItem(category, name) {
@@ -1015,11 +1214,11 @@
         rowType: 'item',
         category,
         name,
-        detail: '',
+        detail: t.detail || '',
         remark: '',
         qty: '',
         unit: t.unit || '',
-        price: ''
+        price: t.price || ''
       });
       renderItems();
     }
@@ -1132,9 +1331,9 @@
             const key = el.dataset.key;
             items[index][key] = el.value;
 
-            // 工種変更時は再描画
+            // 工種入力中に再描画すると、1文字打つたびにフォーカスが飛ぶため再描画しない
             if (key === 'category') {
-              renderItems();
+              renderSummary();
               return;
             }
 
@@ -1146,6 +1345,10 @@
             }
 
             renderSummary();
+          });
+
+          el.addEventListener('blur', () => {
+            if (el.dataset.key === 'category') renderItems();
           });
         });
 
@@ -1663,7 +1866,14 @@
     });
 
 
+    renderCategorySelect();
     document.getElementById('activeCategory')?.addEventListener('change', renderWorkPresets);
+    document.getElementById('newCategoryName')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addCustomCategory();
+      }
+    });
 
     document.getElementById('importJsonInput')?.addEventListener('change', (event) => {
       const file = event.target.files?.[0];
